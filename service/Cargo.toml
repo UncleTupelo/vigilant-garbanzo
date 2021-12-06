@@ -1,0 +1,44 @@
+[package]
+name = "polkadot-service"
+version = "0.6.17"
+authors = ["Parity Technologies <admin@parity.io>"]
+edition = "2018"
+
+[dependencies]
+parking_lot = "0.9.0"
+lazy_static = "1.4.0"
+log = "0.4.8"
+futures = "0.1.29"
+exit-future = "0.1.4"
+slog = "2.5.2"
+hex-literal = "0.2.1"
+av_store = { package = "polkadot-availability-store", path = "../availability-store" }
+consensus = { package = "polkadot-validation", path = "../validation" }
+polkadot-primitives = { path = "../primitives" }
+polkadot-runtime = { path = "../runtime" }
+polkadot-executor = { path = "../executor" }
+polkadot-network = { path = "../network"  }
+polkadot-rpc = { path = "../rpc" }
+sr-io = { git = "https://github.com/paritytech/substrate", branch = "master" }
+sr-api = { git = "https://github.com/paritytech/substrate", branch = "master" }
+sr-primitives = { git = "https://github.com/paritytech/substrate", branch = "master" }
+primitives = { package = "substrate-primitives", git = "https://github.com/paritytech/substrate", branch = "master" }
+client = { package = "substrate-client", git = "https://github.com/paritytech/substrate", branch = "master" }
+client-api = { package = "substrate-client-api", git = "https://github.com/paritytech/substrate", branch = "master" }
+client-db = { package = "substrate-client-db", git = "https://github.com/paritytech/substrate", branch = "master" }
+substrate-executor = { git = "https://github.com/paritytech/substrate", branch = "master" }
+substrate-network = { git = "https://github.com/paritytech/substrate", branch = "master" }
+consensus_common = { package = "substrate-consensus-common", git = "https://github.com/paritytech/substrate", branch = "master" }
+grandpa = { package = "substrate-finality-grandpa", git = "https://github.com/paritytech/substrate", branch = "master" }
+grandpa_primitives = { package = "substrate-finality-grandpa-primitives", git = "https://github.com/paritytech/substrate", branch = "master" }
+inherents = { package = "substrate-inherents", git = "https://github.com/paritytech/substrate", branch = "master" }
+service = { package = "substrate-service", git = "https://github.com/paritytech/substrate", branch = "master" }
+telemetry = { package = "substrate-telemetry", git = "https://github.com/paritytech/substrate", branch = "master" }
+transaction_pool = { package = "sc-transaction-pool", git = "https://github.com/paritytech/substrate", branch = "master" }
+substrate-keystore = { git = "https://github.com/paritytech/substrate", branch = "master" }
+pallet-babe = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "master" }
+pallet-staking = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "master" }
+im-online = { package = "pallet-im-online", git = "https://github.com/paritytech/substrate", default-features = false, branch = "master" }
+authority-discovery = { package = "substrate-authority-discovery", git = "https://github.com/paritytech/substrate", branch = "master" }
+babe = { package = "substrate-consensus-babe", git = "https://github.com/paritytech/substrate", branch = "master" }
+babe-primitives = { package = "substrate-consensus-babe-primitives", git = "https://github.com/paritytech/substrate", default-features = false, branch = "master" }
