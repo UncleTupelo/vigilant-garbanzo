@@ -1,0 +1,59 @@
+[package]
+name = "polkadot-service"
+version = "0.7.19"
+authors = ["Parity Technologies <admin@parity.io>"]
+edition = "2018"
+
+[dependencies]
+parking_lot = "0.9.0"
+serde = { version = "1.0.102", features = ["derive"] }
+lazy_static = "1.4.0"
+log = "0.4.8"
+futures = "0.3.1"
+futures01 = { package = "futures", version = "0.1.29" }
+slog = "2.5.2"
+hex-literal = "0.2.1"
+av_store = { package = "polkadot-availability-store", path = "../availability-store" }
+consensus = { package = "polkadot-validation", path = "../validation" }
+polkadot-primitives = { path = "../primitives" }
+polkadot-runtime = { path = "../runtime/polkadot" }
+kusama-runtime = { path = "../runtime/kusama" }
+polkadot-network = { path = "../network"  }
+polkadot-rpc = { path = "../rpc" }
+sp-io = { git = "https://github.com/tomaka/polkadot", branch = "probably-fix-perfs" }
+sp-api = { git = "https://github.com/tomaka/polkadot", branch = "probably-fix-perfs" }
+sp-runtime = { git = "https://github.com/tomaka/polkadot", branch = "probably-fix-perfs" }
+sp-blockchain = { git = "https://github.com/tomaka/polkadot", branch = "probably-fix-perfs" }
+sp-core = { git = "https://github.com/tomaka/polkadot", branch = "probably-fix-perfs" }
+sc-client = { git = "https://github.com/tomaka/polkadot", branch = "probably-fix-perfs" }
+sc-client-api = { git = "https://github.com/tomaka/polkadot", branch = "probably-fix-perfs" }
+sc-client-db = { git = "https://github.com/tomaka/polkadot", branch = "probably-fix-perfs" }
+sc-chain-spec = { git = "https://github.com/tomaka/polkadot", branch = "probably-fix-perfs" }
+sc-executor = { git = "https://github.com/tomaka/polkadot", branch = "probably-fix-perfs" }
+sc-network = { git = "https://github.com/tomaka/polkadot", branch = "probably-fix-perfs" }
+consensus_common = { package = "sp-consensus", git = "https://github.com/tomaka/polkadot", branch = "probably-fix-perfs" }
+grandpa = { package = "sc-finality-grandpa", git = "https://github.com/tomaka/polkadot", branch = "probably-fix-perfs" }
+grandpa_primitives = { package = "sp-finality-grandpa", git = "https://github.com/tomaka/polkadot", branch = "probably-fix-perfs" }
+inherents = { package = "sp-inherents", git = "https://github.com/tomaka/polkadot", branch = "probably-fix-perfs" }
+service = { package = "sc-service", git = "https://github.com/tomaka/polkadot", branch = "probably-fix-perfs" }
+telemetry = { package = "sc-telemetry", git = "https://github.com/tomaka/polkadot", branch = "probably-fix-perfs" }
+sc-transaction-pool = { git = "https://github.com/tomaka/polkadot", branch = "probably-fix-perfs" }
+sp-transaction-pool = { git = "https://github.com/tomaka/polkadot", branch = "probably-fix-perfs" }
+sc-keystore = { git = "https://github.com/tomaka/polkadot", branch = "probably-fix-perfs" }
+pallet-babe = { git = "https://github.com/tomaka/polkadot", branch = "probably-fix-perfs" }
+pallet-staking = { git = "https://github.com/tomaka/polkadot", branch = "probably-fix-perfs" }
+im-online = { package = "pallet-im-online", git = "https://github.com/tomaka/polkadot", branch = "probably-fix-perfs" }
+authority-discovery = { package = "sc-authority-discovery", git = "https://github.com/tomaka/polkadot", branch = "probably-fix-perfs" }
+authority-discovery-primitives = { package = "sp-authority-discovery", git = "https://github.com/tomaka/polkadot", branch = "probably-fix-perfs" }
+babe = { package = "sc-consensus-babe", git = "https://github.com/tomaka/polkadot", branch = "probably-fix-perfs" }
+babe-primitives = { package = "sp-consensus-babe", git = "https://github.com/tomaka/polkadot", branch = "probably-fix-perfs" }
+sp-block-builder = { git = "https://github.com/tomaka/polkadot", branch = "probably-fix-perfs" }
+pallet-transaction-payment-rpc-runtime-api = { git = "https://github.com/tomaka/polkadot", branch = "probably-fix-perfs" }
+system_rpc_runtime_api = { package = "frame-system-rpc-runtime-api", git = "https://github.com/tomaka/polkadot", branch = "probably-fix-perfs" }
+codec = { package = "parity-scale-codec", version = "1.1.0" }
+sp-session = { git = "https://github.com/tomaka/polkadot", branch = "probably-fix-perfs" }
+sp-offchain = { package = "sp-offchain", git = "https://github.com/tomaka/polkadot", branch = "probably-fix-perfs" }
+
+[features]
+default = ["rocksdb"]
+rocksdb = ["service/rocksdb"]
