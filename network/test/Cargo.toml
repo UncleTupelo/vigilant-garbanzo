@@ -1,0 +1,23 @@
+[package]
+name = "polkadot-network-test"
+version = "0.8.14"
+license = "GPL-3.0"
+authors = ["Parity Technologies <admin@parity.io>"]
+edition = "2018"
+
+[dependencies]
+log = "0.4.8"
+parking_lot = "0.10.0"
+futures = "0.3.1"
+rand = "0.7.2"
+sc-consensus = { git = "https://github.com/paritytech/substrate", branch = "cecton-fix-int-test-3" }
+sc-network = { git = "https://github.com/paritytech/substrate", branch = "cecton-fix-int-test-3" }
+sc-service = { git = "https://github.com/paritytech/substrate", features = ["test-helpers"], branch = "cecton-fix-int-test-3" }
+sc-network-test = { git = "https://github.com/paritytech/substrate", branch = "cecton-fix-int-test-3" }
+sp-consensus = { git = "https://github.com/paritytech/substrate", branch = "cecton-fix-int-test-3" }
+sc-client-api = { git = "https://github.com/paritytech/substrate", branch = "cecton-fix-int-test-3" }
+sp-blockchain = { git = "https://github.com/paritytech/substrate", branch = "cecton-fix-int-test-3" }
+sp-runtime = { git = "https://github.com/paritytech/substrate", branch = "cecton-fix-int-test-3" }
+sp-core = { git = "https://github.com/paritytech/substrate", branch = "cecton-fix-int-test-3" }
+sc-block-builder = { git = "https://github.com/paritytech/substrate", branch = "cecton-fix-int-test-3" }
+polkadot-test-runtime-client = { path = "../../runtime/test-runtime/client" }
