@@ -1,0 +1,11 @@
+[package]
+name = "adder"
+version = "0.1.0"
+authors = ["Parity Technologies <admin@parity.io>"]
+description = "Test parachain which adds to a number as its state transition"
+edition = "2018"
+
+[dependencies]
+parachain = { package = "polkadot-parachain", path = "../../parachain/", default-features = false }
+parity-codec = { version = "4.1", default-features = false, features = ["derive"] }
+tiny-keccak = "1.4"
