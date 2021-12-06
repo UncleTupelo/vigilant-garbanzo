@@ -1,0 +1,59 @@
+[package]
+name = "rialto-bridge-node"
+description = "Substrate node compatible with Rialto runtime"
+version = "0.1.0"
+authors = ["Parity Technologies <admin@parity.io>"]
+edition = "2018"
+build = "build.rs"
+homepage = "https://substrate.dev"
+repository = "https://github.com/paritytech/parity-bridges-common/"
+license = "GPL-3.0-or-later WITH Classpath-exception-2.0"
+
+[dependencies]
+jsonrpc-core = "15.1.0"
+structopt = "0.3.21"
+
+# Bridge dependencies
+
+bp-message-lane = { path = "../../../primitives/message-lane" }
+bp-runtime = { path = "../../../primitives/runtime" }
+bp-rialto = { path = "../../../primitives/rialto" }
+pallet-message-lane = { path = "../../../modules/message-lane" }
+pallet-message-lane-rpc = { path = "../../../modules/message-lane/rpc" }
+rialto-runtime = { path = "../runtime" }
+
+# Substrate Dependencies
+
+frame-benchmarking = { git = "https://github.com/paritytech/substrate", branch = "gui-ease-wip" }
+frame-benchmarking-cli = { git = "https://github.com/paritytech/substrate", branch = "gui-ease-wip" }
+sc-basic-authorship = { git = "https://github.com/paritytech/substrate", branch = "gui-ease-wip" }
+sc-cli = { git = "https://github.com/paritytech/substrate", features = ["wasmtime"] , branch = "gui-ease-wip" }
+sc-client-api = { git = "https://github.com/paritytech/substrate", branch = "gui-ease-wip" }
+sc-consensus = { git = "https://github.com/paritytech/substrate", branch = "gui-ease-wip" }
+sc-consensus-aura = { git = "https://github.com/paritytech/substrate", branch = "gui-ease-wip" }
+sc-executor = { git = "https://github.com/paritytech/substrate", branch = "gui-ease-wip" }
+sc-finality-grandpa = { git = "https://github.com/paritytech/substrate", branch = "gui-ease-wip" }
+sc-finality-grandpa-rpc = { git = "https://github.com/paritytech/substrate", branch = "gui-ease-wip" }
+sc-keystore = { git = "https://github.com/paritytech/substrate", branch = "gui-ease-wip" }
+sc-service = { git = "https://github.com/paritytech/substrate", branch = "gui-ease-wip" }
+sc-rpc = { git = "https://github.com/paritytech/substrate", branch = "gui-ease-wip" }
+sc-transaction-pool = { git = "https://github.com/paritytech/substrate", branch = "gui-ease-wip" }
+sc-telemetry = { git = "https://github.com/paritytech/substrate", branch = "gui-ease-wip" }
+sp-consensus = { git = "https://github.com/paritytech/substrate", branch = "gui-ease-wip" }
+sp-consensus-aura = { git = "https://github.com/paritytech/substrate", branch = "gui-ease-wip" }
+sp-core = { git = "https://github.com/paritytech/substrate", branch = "gui-ease-wip" }
+sp-inherents = { git = "https://github.com/paritytech/substrate", branch = "gui-ease-wip" }
+sp-finality-grandpa = { git = "https://github.com/paritytech/substrate", branch = "gui-ease-wip" }
+sp-runtime = { git = "https://github.com/paritytech/substrate", branch = "gui-ease-wip" }
+substrate-frame-rpc-system = { git = "https://github.com/paritytech/substrate", branch = "gui-ease-wip" }
+
+[build-dependencies]
+build-script-utils = { package = "substrate-build-script-utils", version = "2.0" }
+frame-benchmarking-cli = { git = "https://github.com/paritytech/substrate", branch = "gui-ease-wip" }
+vergen = "3.1.0"
+
+[features]
+default = []
+runtime-benchmarks = [
+	"rialto-runtime/runtime-benchmarks",
+]
