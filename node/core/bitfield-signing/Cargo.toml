@@ -1,0 +1,16 @@
+[package]
+name = "polkadot-node-core-bitfield-signing"
+version = "0.1.0"
+authors = ["Parity Technologies <admin@parity.io>"]
+edition = "2018"
+
+[dependencies]
+bitvec = "0.17.4"
+futures = "0.3.5"
+log = "0.4.11"
+polkadot-primitives = { path = "../../../primitives" }
+polkadot-node-subsystem = { path = "../../subsystem" }
+polkadot-node-subsystem-util = { path = "../../subsystem-util" }
+sp-keystore = { git = "https://github.com/paritytech/substrate", rev = "f7a8b100" }
+wasm-timer = "0.2.4"
+thiserror = "1.0.21"
