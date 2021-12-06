@@ -1,0 +1,42 @@
+[package]
+name = "polkadot-service"
+version = "0.6.6"
+authors = ["Parity Technologies <admin@parity.io>"]
+edition = "2018"
+
+[dependencies]
+parking_lot = "0.9.0"
+lazy_static = "1.0"
+log = "0.4.6"
+futures = "0.1"
+exit-future = "0.1"
+slog = "^2"
+hex-literal = "0.2"
+av_store = { package = "polkadot-availability-store", path = "../availability-store" }
+consensus = { package = "polkadot-validation", path = "../validation" }
+polkadot-primitives = { path = "../primitives" }
+polkadot-runtime = { path = "../runtime" }
+polkadot-executor = { path = "../executor" }
+polkadot-network = { path = "../network"  }
+polkadot-rpc = { path = "../rpc" }
+sr-io = { git = "https://github.com/paritytech/substrate", branch = "ben-backend-to-rpc" }
+sr-primitives = { git = "https://github.com/paritytech/substrate", branch = "ben-backend-to-rpc" }
+primitives = { package = "substrate-primitives", git = "https://github.com/paritytech/substrate", branch = "ben-backend-to-rpc" }
+client = { package = "substrate-client", git = "https://github.com/paritytech/substrate", branch = "ben-backend-to-rpc" }
+client-db = { package = "substrate-client-db", git = "https://github.com/paritytech/substrate", branch = "ben-backend-to-rpc" }
+substrate-executor = { git = "https://github.com/paritytech/substrate", branch = "ben-backend-to-rpc" }
+substrate-network = { git = "https://github.com/paritytech/substrate", branch = "ben-backend-to-rpc" }
+consensus_common = { package = "substrate-consensus-common", git = "https://github.com/paritytech/substrate", branch = "ben-backend-to-rpc" }
+grandpa = { package = "substrate-finality-grandpa", git = "https://github.com/paritytech/substrate", branch = "ben-backend-to-rpc" }
+grandpa_primitives = { package = "substrate-finality-grandpa-primitives", git = "https://github.com/paritytech/substrate", branch = "ben-backend-to-rpc" }
+inherents = { package = "substrate-inherents", git = "https://github.com/paritytech/substrate", branch = "ben-backend-to-rpc" }
+service = { package = "substrate-service", git = "https://github.com/paritytech/substrate", branch = "ben-backend-to-rpc" }
+telemetry = { package = "substrate-telemetry", git = "https://github.com/paritytech/substrate", branch = "ben-backend-to-rpc" }
+transaction_pool = { package = "substrate-transaction-pool", git = "https://github.com/paritytech/substrate", branch = "ben-backend-to-rpc" }
+substrate-keystore = { git = "https://github.com/paritytech/substrate", branch = "ben-backend-to-rpc" }
+srml-babe = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "ben-backend-to-rpc" }
+srml-staking = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "ben-backend-to-rpc" }
+im-online = { package = "srml-im-online", git = "https://github.com/paritytech/substrate", default-features = false, branch = "ben-backend-to-rpc" }
+authority-discovery = { package = "substrate-authority-discovery", git = "https://github.com/paritytech/substrate", branch = "ben-backend-to-rpc" }
+babe = { package = "substrate-consensus-babe", git = "https://github.com/paritytech/substrate", branch = "ben-backend-to-rpc" }
+babe-primitives = { package = "substrate-consensus-babe-primitives", git = "https://github.com/paritytech/substrate", default-features = false, branch = "ben-backend-to-rpc" }

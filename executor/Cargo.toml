@@ -1,0 +1,10 @@
+[package]
+name = "polkadot-executor"
+version = "0.6.6"
+authors = ["Parity Technologies <admin@parity.io>"]
+description = "Polkadot node implementation in Rust."
+edition = "2018"
+
+[dependencies]
+substrate-executor = { git = "https://github.com/paritytech/substrate", branch = "ben-backend-to-rpc" }
+polkadot-runtime = { path = "../runtime" }
