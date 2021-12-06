@@ -1,0 +1,16 @@
+[package]
+name = "polkadot-node-core-candidate-selection"
+version = "0.1.0"
+authors = ["Parity Technologies <admin@parity.io>"]
+edition = "2018"
+
+[dependencies]
+futures = "0.3.5"
+log = "0.4.11"
+thiserror = "1.0.21"
+polkadot-primitives = { path = "../../../primitives" }
+polkadot-node-subsystem = { path = "../../subsystem" }
+polkadot-node-subsystem-util = { path = "../../subsystem-util" }
+
+[dev-dependencies]
+sp-core = { git = "https://github.com/paritytech/substrate", rev = "f7a8b10" }
