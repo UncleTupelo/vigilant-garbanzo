@@ -1,0 +1,18 @@
+[package]
+name = "polkadot-parachain"
+version = "0.1.0"
+authors = ["Parity Technologies <admin@parity.io>"]
+description = "Types and utilities for creating and working with parachains"
+
+[dependencies]
+parity-codec = "2.0"
+parity-codec-derive = "2.0"
+wasmi = { version = "0.4", optional = true }
+error-chain = { version = "0.12", optional = true }
+
+[dev-dependencies]
+tiny-keccak = "1.4"
+
+[features]
+default = ["std"]
+std = ["parity-codec/std", "wasmi", "error-chain"]
