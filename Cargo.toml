@@ -1,0 +1,61 @@
+[[bin]]
+name = "polkadot"
+path = "src/main.rs"
+
+[package]
+name = "polkadot"
+version = "0.7.27"
+authors = ["Parity Technologies <admin@parity.io>"]
+build = "build.rs"
+edition = "2018"
+
+[dependencies]
+cli = { package = "polkadot-cli", path = "cli" }
+futures = "0.3.4"
+service = { package = "polkadot-service", path = "service" }
+parity-util-mem = { version = "0.5.1", default-features = false, features = ["jemalloc-global"] }
+
+[build-dependencies]
+vergen = "3.0.4"
+
+[dev-dependencies]
+assert_cmd = "0.12"
+nix = "0.17"
+
+[workspace]
+members = [
+	"availability-store",
+	"cli",
+	"collator",
+	"erasure-coding",
+	"network",
+	"network/test",
+	"primitives",
+	"runtime/common",
+	"runtime/polkadot",
+	"runtime/kusama",
+	"runtime/test-runtime",
+	"runtime/test-runtime/client",
+	"service",
+	"statement-table",
+	"service",
+	"validation",
+
+	"test-parachains/adder",
+	"test-parachains/adder/collator",
+]
+exclude = [
+	"runtime/polkadot/wasm",
+	"runtime/kusama/wasm",
+	"test-parachains/adder/wasm",
+]
+
+[badges]
+maintenance = { status = "actively-developed" }
+
+[profile.release]
+# Polkadot runtime requires unwinding.
+panic = "unwind"
+
+[features]
+runtime-benchmarks=["cli/runtime-benchmarks"]
