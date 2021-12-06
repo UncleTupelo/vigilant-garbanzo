@@ -1,0 +1,23 @@
+[package]
+name = "polkadot-test-runtime-client"
+version = "2.0.0"
+authors = ["Parity Technologies <admin@parity.io>"]
+edition = "2018"
+license = "GPL-3.0"
+
+[dependencies]
+sc-block-builder = { git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+sc-consensus = { git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+sc-service = { git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake", features = ["test-helpers"],  default-features = false }
+substrate-test-client = { git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+sp-core = { git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+polkadot-test-runtime = { path = ".." }
+polkadot-runtime-common = { path = "../../common" }
+polkadot-primitives = { path = "../../../primitives" }
+sp-runtime = { git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+sp-api = { git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+sp-blockchain = { git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+codec = { package = "parity-scale-codec", version = "1.0.0" }
+sc-client-api = { git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+pallet-timestamp = { git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+futures = "0.3.1"

@@ -1,0 +1,69 @@
+[package]
+name = "polkadot-service"
+version = "0.7.34-dev"
+authors = ["Parity Technologies <admin@parity.io>"]
+edition = "2018"
+
+[dependencies]
+parking_lot = "0.9.0"
+serde = { version = "1.0.102", features = ["derive"] }
+lazy_static = "1.4.0"
+log = "0.4.8"
+futures = "0.3.4"
+slog = "2.5.2"
+hex-literal = "0.2.1"
+av_store = { package = "polkadot-availability-store", path = "../availability-store", optional = true }
+consensus = { package = "polkadot-validation", path = "../validation", optional = true }
+polkadot-primitives = { path = "../primitives" }
+polkadot-runtime = { path = "../runtime/polkadot" }
+kusama-runtime = { path = "../runtime/kusama" }
+westend-runtime = { path = "../runtime/westend" }
+polkadot-network = { path = "../network", optional = true }
+polkadot-rpc = { path = "../rpc" }
+sp-io = { git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+sp-api = { git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+sp-runtime = { git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+sp-blockchain = { git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+sp-core = { git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+sc-client-api = { git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+sc-client-db = { git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+sc-chain-spec = { git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+sc-executor = { git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+sc-consensus = { git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+sc-network = { git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+consensus_common = { package = "sp-consensus", git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+grandpa = { package = "sc-finality-grandpa", git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+grandpa_primitives = { package = "sp-finality-grandpa", git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+inherents = { package = "sp-inherents", git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+service = { package = "sc-service", git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake", default-features = false }
+telemetry = { package = "sc-telemetry", git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+sc-block-builder = { git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+sc-transaction-pool = { git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+sp-transaction-pool = { git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+sc-keystore = { git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+pallet-babe = { git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+pallet-staking = { git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+im-online = { package = "pallet-im-online", git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+authority-discovery = { package = "sc-authority-discovery", git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+authority-discovery-primitives = { package = "sp-authority-discovery", git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+babe = { package = "sc-consensus-babe", git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+babe-primitives = { package = "sp-consensus-babe", git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+sp-block-builder = { git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+pallet-transaction-payment-rpc-runtime-api = { git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+system_rpc_runtime_api = { package = "frame-system-rpc-runtime-api", git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+codec = { package = "parity-scale-codec", version = "1.3.0" }
+sp-session = { git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+sp-offchain = { package = "sp-offchain", git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+prometheus-endpoint = { package = "substrate-prometheus-endpoint", git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+frame-benchmarking = { git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+
+[dev-dependencies]
+polkadot-test-runtime-client = { path = "../runtime/test-runtime/client" }
+sc-block-builder = { git = "https://github.com/tomaka/polkadot", branch = "move-legacy-handshake" }
+env_logger = "0.7.0"
+
+[features]
+default = ["db", "full-node"]
+db = ["service/db"]
+runtime-benchmarks = ["polkadot-runtime/runtime-benchmarks", "kusama-runtime/runtime-benchmarks", "westend-runtime/runtime-benchmarks"]
+full-node = ["av_store", "consensus", "polkadot-network"]
