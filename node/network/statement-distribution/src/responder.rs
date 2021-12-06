@@ -22,9 +22,9 @@ use futures::{
 
 use polkadot_node_network_protocol::{
 	request_response::{
-		incoming::{self, OutgoingResponse},
+		request::OutgoingResponse,
 		v1::{StatementFetchingRequest, StatementFetchingResponse},
-		IncomingRequestReceiver, MAX_PARALLEL_STATEMENT_REQUESTS,
+		IncomingRequest, MAX_PARALLEL_STATEMENT_REQUESTS,
 	},
 	PeerId, UnifiedReputationChange as Rep,
 };
@@ -51,7 +51,7 @@ pub enum ResponderMessage {
 /// `CommittedCandidateReceipt` from peers, whether this can be used to re-assemble one ore
 /// many `SignedFullStatement`s needs to be verified by the caller.
 pub async fn respond(
-	mut receiver: IncomingRequestReceiver<StatementFetchingRequest>,
+	mut receiver: mpsc::Receiver<sc_network::config::IncomingRequest>,
 	mut sender: mpsc::Sender<ResponderMessage>,
 ) {
 	let mut pending_out = FuturesUnordered::new();
@@ -74,16 +74,23 @@ pub async fn respond(
 			pending_out.next().await;
 		}
 
-		let req = match receiver.recv(|| vec![COST_INVALID_REQUEST]).await {
-			Err(incoming::Error::Fatal(f)) => {
-				tracing::debug!(target: LOG_TARGET, error = ?f, "Shutting down request responder");
+		let raw = match receiver.next().await {
+			None => {
+				tracing::debug!(target: LOG_TARGET, "Shutting down request responder");
 				return
 			},
-			Err(incoming::Error::NonFatal(err)) => {
+			Some(v) => v,
+		};
+
+		let req = match IncomingRequest::<StatementFetchingRequest>::try_from_raw(
+			raw,
+			vec![COST_INVALID_REQUEST],
+		) {
+			Err(err) => {
 				tracing::debug!(target: LOG_TARGET, ?err, "Decoding request failed");
 				continue
 			},
-			Ok(v) => v,
+			Ok(payload) => payload,
 		};
 
 		let (tx, rx) = oneshot::channel();

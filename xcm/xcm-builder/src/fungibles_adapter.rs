@@ -18,12 +18,7 @@
 
 use frame_support::traits::{tokens::fungibles, Contains, Get};
 use sp_std::{borrow::Borrow, marker::PhantomData, prelude::*, result};
-use xcm::latest::{
-	AssetId::{Abstract, Concrete},
-	Error as XcmError,
-	Fungibility::Fungible,
-	Junction, MultiAsset, MultiLocation, Result,
-};
+use xcm::v0::{Error as XcmError, Junction, MultiAsset, MultiLocation, Result};
 use xcm_executor::traits::{Convert, Error as MatchError, MatchesFungibles, TransactAsset};
 
 /// Converter struct implementing `AssetIdConversion` converting a numeric asset ID (must be `TryFrom/TryInto<u128>`) into
@@ -38,24 +33,18 @@ impl<Prefix: Get<MultiLocation>, AssetId: Clone, ConvertAssetId: Convert<u128, A
 	fn convert_ref(id: impl Borrow<MultiLocation>) -> result::Result<AssetId, ()> {
 		let prefix = Prefix::get();
 		let id = id.borrow();
-		if prefix.parent_count() != id.parent_count() ||
-			prefix
-				.interior()
-				.iter()
-				.enumerate()
-				.any(|(index, junction)| id.interior().at(index) != Some(junction))
-		{
+		if !prefix.iter().enumerate().all(|(index, item)| id.at(index) == Some(item)) {
 			return Err(())
 		}
-		match id.interior().at(prefix.interior().len()) {
-			Some(Junction::GeneralIndex(id)) => ConvertAssetId::convert_ref(id),
+		match id.at(prefix.len()) {
+			Some(Junction::GeneralIndex { id }) => ConvertAssetId::convert_ref(id),
 			_ => Err(()),
 		}
 	}
 	fn reverse_ref(what: impl Borrow<AssetId>) -> result::Result<MultiLocation, ()> {
 		let mut location = Prefix::get();
 		let id = ConvertAssetId::reverse_ref(what)?;
-		location.push_interior(Junction::GeneralIndex(id)).map_err(|_| ())?;
+		location.push(Junction::GeneralIndex { id }).map_err(|_| ())?;
 		Ok(location)
 	}
 }
@@ -72,8 +61,8 @@ impl<
 	for ConvertedConcreteAssetId<AssetId, Balance, ConvertAssetId, ConvertBalance>
 {
 	fn matches_fungibles(a: &MultiAsset) -> result::Result<(AssetId, Balance), MatchError> {
-		let (amount, id) = match (&a.fun, &a.id) {
-			(Fungible(ref amount), Concrete(ref id)) => (amount, id),
+		let (id, amount) = match a {
+			MultiAsset::ConcreteFungible { id, amount } => (id, amount),
 			_ => return Err(MatchError::AssetNotFound),
 		};
 		let what =
@@ -96,8 +85,8 @@ impl<
 	for ConvertedAbstractAssetId<AssetId, Balance, ConvertAssetId, ConvertBalance>
 {
 	fn matches_fungibles(a: &MultiAsset) -> result::Result<(AssetId, Balance), MatchError> {
-		let (amount, id) = match (&a.fun, &a.id) {
-			(Fungible(ref amount), Abstract(ref id)) => (amount, id),
+		let (id, amount) = match a {
+			MultiAsset::AbstractFungible { id, amount } => (id, amount),
 			_ => return Err(MatchError::AssetNotFound),
 		};
 		let what =

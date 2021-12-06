@@ -26,7 +26,6 @@ use runtime_parachains::{
 	paras::{self, ParaGenesisArgs},
 	ump, ParaLifecycle,
 };
-use sp_std::boxed::Box;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -133,7 +132,7 @@ pub mod pallet {
 		pub fn sudo_queue_downward_xcm(
 			origin: OriginFor<T>,
 			id: ParaId,
-			xcm: Box<xcm::opaque::VersionedXcm>,
+			xcm: xcm::opaque::VersionedXcm,
 		) -> DispatchResult {
 			ensure_root(origin)?;
 			ensure!(<paras::Pallet<T>>::is_valid_para(id), Error::<T>::ParaDoesntExist);

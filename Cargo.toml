@@ -18,7 +18,7 @@ parity-util-mem = { version = "*", default-features = false, features = ["jemall
 
 [dev-dependencies]
 assert_cmd = "1.0.2"
-nix = "0.19.1"
+nix = "0.20.0"
 tempfile = "3.2.0"
 
 [workspace]
@@ -39,7 +39,6 @@ members = [
 	"xcm",
 	"xcm/xcm-builder",
 	"xcm/xcm-executor",
-	"xcm/xcm-executor/integration-tests",
 	"xcm/xcm-simulator",
 	"xcm/xcm-simulator/example",
 	"xcm/pallet-xcm",
@@ -142,7 +141,3 @@ polkadot = { path = "/usr/bin/polkadot" }
 
 [package.metadata.rpm.files]
 "../scripts/packaging/polkadot.service" = { path = "/usr/lib/systemd/system/polkadot.service", mode = "644" }
-
-
-[package.metadata.spellcheck]
-config = "./scripts/gitlab/spellcheck.toml"

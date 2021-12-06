@@ -17,45 +17,40 @@
 
 //! Error handling related code and Error/Result definitions.
 
+use polkadot_node_primitives::UncheckedSignedFullStatement;
+use polkadot_subsystem::errors::SubsystemError;
 use thiserror::Error;
 
-use polkadot_node_network_protocol::request_response::incoming;
-use polkadot_node_primitives::UncheckedSignedFullStatement;
-use polkadot_node_subsystem_util::runtime;
-use polkadot_subsystem::errors::SubsystemError;
+use polkadot_node_subsystem_util::{runtime, unwrap_non_fatal, Fault};
 
 use crate::LOG_TARGET;
 
 /// General result.
 pub type Result<T> = std::result::Result<T, Error>;
-/// Result with only fatal errors.
+
+/// Result for fatal only failures.
 pub type FatalResult<T> = std::result::Result<T, Fatal>;
 
 /// Errors for statement distribution.
-#[derive(Debug, Error, derive_more::From)]
+#[derive(Debug, Error)]
 #[error(transparent)]
-pub enum Error {
-	/// All fatal errors.
-	Fatal(Fatal),
-	/// All nonfatal/potentially recoverable errors.
-	NonFatal(NonFatal),
+pub struct Error(pub Fault<NonFatal, Fatal>);
+
+impl From<NonFatal> for Error {
+	fn from(e: NonFatal) -> Self {
+		Self(Fault::from_non_fatal(e))
+	}
+}
+
+impl From<Fatal> for Error {
+	fn from(f: Fatal) -> Self {
+		Self(Fault::from_fatal(f))
+	}
 }
 
 impl From<runtime::Error> for Error {
 	fn from(o: runtime::Error) -> Self {
-		match o {
-			runtime::Error::Fatal(f) => Self::Fatal(Fatal::Runtime(f)),
-			runtime::Error::NonFatal(f) => Self::NonFatal(NonFatal::Runtime(f)),
-		}
-	}
-}
-
-impl From<incoming::Error> for Error {
-	fn from(o: incoming::Error) -> Self {
-		match o {
-			incoming::Error::Fatal(f) => Self::Fatal(Fatal::IncomingRequest(f)),
-			incoming::Error::NonFatal(f) => Self::NonFatal(NonFatal::IncomingRequest(f)),
-		}
+		Self(Fault::from_other(o))
 	}
 }
 
@@ -69,26 +64,18 @@ pub enum Fatal {
 	/// Errors coming from runtime::Runtime.
 	#[error("Error while accessing runtime information")]
 	Runtime(#[from] runtime::Fatal),
-
-	/// Errors coming from receiving incoming requests.
-	#[error("Retrieving next incoming request failed")]
-	IncomingRequest(#[from] incoming::Fatal),
 }
 
 /// Errors for fetching of runtime information.
 #[derive(Debug, Error)]
 pub enum NonFatal {
 	/// Signature was invalid on received statement.
-	#[error("CollationSeconded contained statement with invalid signature")]
+	#[error("CollationSeconded contained statement with invalid signature.")]
 	InvalidStatementSignature(UncheckedSignedFullStatement),
 
 	/// Errors coming from runtime::Runtime.
 	#[error("Error while accessing runtime information")]
 	Runtime(#[from] runtime::NonFatal),
-
-	/// Errors coming from receiving incoming requests.
-	#[error("Retrieving next incoming request failed")]
-	IncomingRequest(#[from] incoming::NonFatal),
 }
 
 /// Utility for eating top level errors and log them.
@@ -96,12 +83,8 @@ pub enum NonFatal {
 /// We basically always want to try and continue on error. This utility function is meant to
 /// consume top-level errors by simply logging them.
 pub fn log_error(result: Result<()>, ctx: &'static str) -> FatalResult<()> {
-	match result {
-		Err(Error::Fatal(f)) => Err(f),
-		Err(Error::NonFatal(error)) => {
-			tracing::warn!(target: LOG_TARGET, error = ?error, ctx);
-			Ok(())
-		},
-		Ok(()) => Ok(()),
+	if let Some(error) = unwrap_non_fatal(result.map_err(|e| e.0))? {
+		tracing::warn!(target: LOG_TARGET, error = ?error, ctx)
 	}
+	Ok(())
 }

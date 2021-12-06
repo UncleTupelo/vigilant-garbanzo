@@ -49,9 +49,7 @@ use authority_discovery_primitives::AuthorityId as AuthorityDiscoveryId;
 use beefy_primitives::crypto::AuthorityId as BeefyId;
 use frame_support::{
 	construct_runtime, parameter_types,
-	traits::{
-		Contains, Everything, InstanceFilter, KeyOwnerProofSystem, LockIdentifier, OnRuntimeUpgrade,
-	},
+	traits::{All, Filter, InstanceFilter, KeyOwnerProofSystem, LockIdentifier, OnRuntimeUpgrade},
 	weights::Weight,
 	PalletId, RuntimeDebug,
 };
@@ -77,7 +75,13 @@ use sp_staking::SessionIndex;
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 use static_assertions::const_assert;
-use xcm::latest::prelude::*;
+use xcm::v0::{
+	BodyId,
+	Junction::Parachain,
+	MultiAsset::{self, AllConcreteFungible},
+	MultiLocation::{self, Null, X1},
+	NetworkId, Xcm,
+};
 use xcm_builder::{
 	AccountId32Aliases, AllowTopLevelPaidExecutionFrom, AllowUnpaidExecutionFrom,
 	BackingToPlurality, ChildParachainAsNative, ChildParachainConvertsVia,
@@ -138,8 +142,8 @@ pub fn native_version() -> NativeVersion {
 
 /// Don't allow swaps until parathread story is more mature.
 pub struct BaseFilter;
-impl Contains<Call> for BaseFilter {
-	fn contains(c: &Call) -> bool {
+impl Filter<Call> for BaseFilter {
+	fn filter(c: &Call) -> bool {
 		!matches!(c, Call::Registrar(paras_registrar::Call::swap(..)))
 	}
 }
@@ -345,8 +349,11 @@ parameter_types! {
 
 	// signed config
 	pub const SignedMaxSubmissions: u32 = 16;
-	pub const SignedDepositBase: Balance = deposit(2, 0);
-	pub const SignedDepositByte: Balance = deposit(0, 10) / 1024;
+	pub const SignedDepositBase: Balance = deposit(1, 0);
+	// A typical solution occupies within an order of magnitude of 50kb.
+	// This formula is currently adjusted such that a typical solution will spend an amount equal
+	// to the base deposit for every 50 kb.
+	pub const SignedDepositByte: Balance = deposit(1, 0) / (50 * 1024);
 	// Each good submission will get 1/10 KSM as reward
 	pub SignedRewardBase: Balance =  UNITS / 10;
 	// fallback: emergency phase.
@@ -389,7 +396,7 @@ impl pallet_election_provider_multi_phase::Config for Runtime {
 	type OffchainRepeat = OffchainRepeat;
 	type MinerTxPriority = NposSolutionPriority;
 	type DataProvider = Staking;
-	type Solution = NposCompactSolution24;
+	type CompactSolution = NposCompactSolution24;
 	type OnChainAccuracy = Perbill;
 	type Fallback = Fallback;
 	type BenchmarkingConfig = runtime_common::elections::BenchmarkConfig;
@@ -481,7 +488,7 @@ type SlashCancelOrigin = EnsureOneOf<
 
 impl pallet_staking::Config for Runtime {
 	const MAX_NOMINATIONS: u32 =
-		<NposCompactSolution24 as sp_npos_elections::NposSolution>::LIMIT as u32;
+		<NposCompactSolution24 as sp_npos_elections::CompactSolution>::LIMIT as u32;
 	type Currency = Balances;
 	type UnixTime = Timestamp;
 	type CurrencyToVote = CurrencyToVote;
@@ -1041,16 +1048,14 @@ impl InstanceFilter<Call> for ProxyType {
 					Call::Treasury(..) | Call::Bounties(..) |
 					Call::Tips(..) | Call::Utility(..)
 			),
-			ProxyType::Staking => {
-				matches!(c, Call::Staking(..) | Call::Session(..) | Call::Utility(..))
-			},
+			ProxyType::Staking =>
+				matches!(c, Call::Staking(..) | Call::Session(..) | Call::Utility(..)),
 			ProxyType::IdentityJudgement => matches!(
 				c,
 				Call::Identity(pallet_identity::Call::provide_judgement(..)) | Call::Utility(..)
 			),
-			ProxyType::CancelProxy => {
-				matches!(c, Call::Proxy(pallet_proxy::Call::reject_announcement(..)))
-			},
+			ProxyType::CancelProxy =>
+				matches!(c, Call::Proxy(pallet_proxy::Call::reject_announcement(..))),
 		}
 	}
 	fn is_superset(&self, o: &Self) -> bool {
@@ -1200,14 +1205,14 @@ impl auctions::Config for Runtime {
 
 parameter_types! {
 	/// The location of the KSM token, from the context of this chain. Since this token is native to this
-	/// chain, we make it synonymous with it and thus it is the `Here` location, which means "equivalent to
+	/// chain, we make it synonymous with it and thus it is the `Null` location, which means "equivalent to
 	/// the context".
-	pub const KsmLocation: MultiLocation = Here.into();
+	pub const KsmLocation: MultiLocation = MultiLocation::Null;
 	/// The Kusama network ID. This is named.
 	pub const KusamaNetwork: NetworkId = NetworkId::Kusama;
 	/// Our XCM location ancestry - i.e. what, if anything, `Parent` means evaluated in our context. Since
 	/// Kusama is a top-level relay-chain, there is no ancestry.
-	pub const Ancestry: MultiLocation = Here.into();
+	pub const Ancestry: MultiLocation = MultiLocation::Null;
 	/// The check account, which holds any native assets that have been teleported out and not back in (yet).
 	pub CheckAccount: AccountId = XcmPallet::check_account();
 }
@@ -1259,12 +1264,12 @@ parameter_types! {
 /// individual routers.
 pub type XcmRouter = (
 	// Only one router so far - use DMP to communicate with child parachains.
-	xcm_sender::ChildParachainRouter<Runtime, xcm::AlwaysRelease>,
+	xcm_sender::ChildParachainRouter<Runtime>,
 );
 
 parameter_types! {
-	pub const Kusama: MultiAssetFilter = Wild(AllOf { fun: WildFungible, id: Concrete(KsmLocation::get()) });
-	pub const KusamaForStatemint: (MultiAssetFilter, MultiLocation) = (Kusama::get(), Parachain(1000).into());
+	pub const KusamaForStatemint: (MultiAsset, MultiLocation) =
+		(AllConcreteFungible { id: Null }, X1(Parachain(1000)));
 }
 pub type TrustedTeleporters = (xcm_builder::Case<KusamaForStatemint>,);
 
@@ -1273,7 +1278,7 @@ pub type Barrier = (
 	// Weight that is paid for may be consumed.
 	TakeWeightCredit,
 	// If the message is one that immediately attemps to pay for execution, then allow it.
-	AllowTopLevelPaidExecutionFrom<Everything>,
+	AllowTopLevelPaidExecutionFrom<All<MultiLocation>>,
 	// Messages coming from system parachains need not pay for execution.
 	AllowUnpaidExecutionFrom<IsChildSystemParachain<ParaId>>,
 );
@@ -1312,17 +1317,68 @@ pub type LocalOriginToLocation = (
 	SignedToAccountId32<Origin, AccountId, KusamaNetwork>,
 );
 
+pub struct OnlyWithdrawTeleportForAccounts;
+impl frame_support::traits::Contains<(MultiLocation, Xcm<Call>)>
+	for OnlyWithdrawTeleportForAccounts
+{
+	fn contains((ref origin, ref msg): &(MultiLocation, Xcm<Call>)) -> bool {
+		use xcm::v0::{
+			Junction::{AccountId32, Plurality},
+			MultiAsset::{All, ConcreteFungible},
+			Order::{BuyExecution, DepositAsset, InitiateTeleport},
+			Xcm::WithdrawAsset,
+		};
+		match origin {
+			// Root and council are are allowed to execute anything.
+			Null | X1(Plurality { .. }) => true,
+			X1(AccountId32 { .. }) => {
+				// An account ID trying to send a message. We ensure that it's sensible.
+				// This checks that it's of the form:
+				// WithdrawAsset {
+				//   assets: [ ConcreteFungible { id: Null } ],
+				//   effects: [ BuyExecution, InitiateTeleport {
+				//     assets: All,
+				//     dest: Parachain,
+				//     effects: [ BuyExecution, DepositAssets {
+				//       assets: All,
+				//       dest: AccountId32,
+				//     } ]
+				//   } ]
+				// }
+				matches!(msg, WithdrawAsset { ref assets, ref effects }
+					if assets.len() == 1
+					&& matches!(assets[0], ConcreteFungible { id: Null, .. })
+					&& effects.len() == 2
+					&& matches!(effects[0], BuyExecution { .. })
+					&& matches!(effects[1], InitiateTeleport { ref assets, dest: X1(Parachain(..)), ref effects }
+						if assets.len() == 1
+						&& matches!(assets[0], All)
+						&& effects.len() == 2
+						&& matches!(effects[0], BuyExecution { .. })
+						&& matches!(effects[1], DepositAsset { ref assets, dest: X1(AccountId32{..}) }
+							if assets.len() == 1
+							&& matches!(assets[0], All)
+						)
+					)
+				)
+			},
+			// Nobody else is allowed to execute anything.
+			_ => false,
+		}
+	}
+}
+
 impl pallet_xcm::Config for Runtime {
 	type Event = Event;
 	type SendXcmOrigin = xcm_builder::EnsureXcmOrigin<Origin, LocalOriginToLocation>;
 	type XcmRouter = XcmRouter;
 	// Anyone can execute XCM messages locally...
 	type ExecuteXcmOrigin = xcm_builder::EnsureXcmOrigin<Origin, LocalOriginToLocation>;
-	// ...but they must match our filter, which rejects all.
-	type XcmExecuteFilter = ();
+	// ...but they must match our filter, which requires them to be a simple withdraw + teleport.
+	type XcmExecuteFilter = OnlyWithdrawTeleportForAccounts;
 	type XcmExecutor = XcmExecutor<XcmConfig>;
-	type XcmTeleportFilter = Everything;
-	type XcmReserveTransferFilter = Everything;
+	type XcmTeleportFilter = All<(MultiLocation, Vec<MultiAsset>)>;
+	type XcmReserveTransferFilter = All<(MultiLocation, Vec<MultiAsset>)>;
 	type Weigher = FixedWeightBounds<BaseXcmWeight, Call>;
 	type LocationInverter = LocationInverter<Ancestry>;
 }
@@ -1484,7 +1540,7 @@ pub type Executive = frame_executive::Executive<
 	frame_system::ChainContext<Runtime>,
 	Runtime,
 	AllPallets,
-	MigratePalletVersionToStorageVersion,
+	(RemoveCollectiveFlip, MigratePalletVersionToStorageVersion),
 >;
 /// The payload being signed in the transactions.
 pub type SignedPayload = generic::SignedPayload<Call, SignedExtra>;
@@ -1497,6 +1553,16 @@ impl OnRuntimeUpgrade for MigratePalletVersionToStorageVersion {
 		frame_support::migrations::migrate_from_pallet_version_to_storage_version::<
 			AllPalletsWithSystem,
 		>(&RocksDbWeight::get())
+	}
+}
+
+pub struct RemoveCollectiveFlip;
+impl frame_support::traits::OnRuntimeUpgrade for RemoveCollectiveFlip {
+	fn on_runtime_upgrade() -> Weight {
+		use frame_support::storage::migration;
+		// Remove the storage value `RandomMaterial` from removed pallet `RandomnessCollectiveFlip`
+		migration::remove_storage_prefix(b"RandomnessCollectiveFlip", b"RandomMaterial", b"");
+		<Runtime as frame_system::Config>::DbWeight::get().writes(1)
 	}
 }
 
@@ -1916,19 +1982,5 @@ sp_api::impl_runtime_apis! {
 			if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
 			Ok(batches)
 		}
-	}
-}
-
-#[cfg(test)]
-mod tests_fess {
-	use super::*;
-	use sp_runtime::assert_eq_error_rate;
-
-	#[test]
-	fn signed_deposit_is_sensible() {
-		// ensure this number does not change, or that it is checked after each change.
-		// a 1 MB solution should need around 0.16 KSM deposit
-		let deposit = SignedDepositBase::get() + (SignedDepositByte::get() * 1024 * 1024);
-		assert_eq_error_rate!(deposit, UNITS * 16 / 100, UNITS / 100);
 	}
 }

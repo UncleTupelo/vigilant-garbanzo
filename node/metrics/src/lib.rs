@@ -14,28 +14,25 @@
 // You should have received a copy of the GNU General Public License
 // along with Polkadot.  If not, see <http://www.gnu.org/licenses/>.
 
-//! Metrics helpers
+//! Utility module for subsystems
 //!
-//! Collects a bunch of metrics providers and related features such as
-//! `Metronome` for usage with metrics collections.
+//! Many subsystems have common interests such as canceling a bunch of spawned jobs,
+//! or determining what their validator ID is. These common interests are factored into
+//! this module.
 //!
 //! This crate also reexports Prometheus metric types which are expected to be implemented by subsystems.
 
-#![deny(missing_docs)]
-#![deny(unused_imports)]
+#![warn(missing_docs)]
+
+use futures::prelude::*;
+use futures_timer::Delay;
+use std::{
+	pin::Pin,
+	task::{Context, Poll},
+	time::Duration,
+};
 
 pub use metered_channel as metered;
-
-/// Memory allocation stats tracking.
-#[cfg(feature = "memory-stats")]
-pub mod memory_stats;
-
-#[cfg(feature = "memory-stats")]
-pub use self::memory_stats::{MemoryAllocationSnapshot, MemoryAllocationTracker};
-
-/// Cyclic metric collection support.
-pub mod metronome;
-pub use self::metronome::Metronome;
 
 /// This module reexports Prometheus types and defines the [`Metrics`] trait.
 pub mod metrics {
@@ -74,5 +71,49 @@ pub mod metrics {
 		) -> Result<(), prometheus::PrometheusError> {
 			Ok(())
 		}
+	}
+}
+
+#[derive(Copy, Clone)]
+enum MetronomeState {
+	Snooze,
+	SetAlarm,
+}
+
+/// Create a stream of ticks with a defined cycle duration.
+pub struct Metronome {
+	delay: Delay,
+	period: Duration,
+	state: MetronomeState,
+}
+
+impl Metronome {
+	/// Create a new metronome source with a defined cycle duration.
+	pub fn new(cycle: Duration) -> Self {
+		let period = cycle.into();
+		Self { period, delay: Delay::new(period), state: MetronomeState::Snooze }
+	}
+}
+
+impl futures::Stream for Metronome {
+	type Item = ();
+	fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+		loop {
+			match self.state {
+				MetronomeState::SetAlarm => {
+					let val = self.period.clone();
+					self.delay.reset(val);
+					self.state = MetronomeState::Snooze;
+				},
+				MetronomeState::Snooze => {
+					if !Pin::new(&mut self.delay).poll(cx).is_ready() {
+						break
+					}
+					self.state = MetronomeState::SetAlarm;
+					return Poll::Ready(Some(()))
+				},
+			}
+		}
+		Poll::Pending
 	}
 }

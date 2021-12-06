@@ -20,30 +20,33 @@
 use thiserror::Error;
 
 use polkadot_node_primitives::disputes::DisputeMessageCheckError;
-use polkadot_node_subsystem_util::runtime;
+use polkadot_node_subsystem_util::{runtime, Fault};
 use polkadot_subsystem::SubsystemError;
 
-#[derive(Debug, Error, derive_more::From)]
+#[derive(Debug, Error)]
 #[error(transparent)]
-pub enum Error {
-	/// All fatal errors.
-	Fatal(Fatal),
-	/// All nonfatal/potentially recoverable errors.
-	NonFatal(NonFatal),
+pub struct Error(pub Fault<NonFatal, Fatal>);
+
+impl From<NonFatal> for Error {
+	fn from(e: NonFatal) -> Self {
+		Self(Fault::from_non_fatal(e))
+	}
+}
+
+impl From<Fatal> for Error {
+	fn from(f: Fatal) -> Self {
+		Self(Fault::from_fatal(f))
+	}
 }
 
 impl From<runtime::Error> for Error {
 	fn from(o: runtime::Error) -> Self {
-		match o {
-			runtime::Error::Fatal(f) => Self::Fatal(Fatal::Runtime(f)),
-			runtime::Error::NonFatal(f) => Self::NonFatal(NonFatal::Runtime(f)),
-		}
+		Self(Fault::from_other(o))
 	}
 }
 
 /// Fatal errors of this subsystem.
 #[derive(Debug, Error)]
-#[error(transparent)]
 pub enum Fatal {
 	/// Spawning a running task failed.
 	#[error("Spawning subsystem task failed")]
