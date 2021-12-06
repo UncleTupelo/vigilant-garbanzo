@@ -1,0 +1,68 @@
+[package]
+name = "polkadot-service"
+version = "0.7.32-dev"
+authors = ["Parity Technologies <admin@parity.io>"]
+edition = "2018"
+
+[dependencies]
+parking_lot = "0.9.0"
+serde = { version = "1.0.102", features = ["derive"] }
+lazy_static = "1.4.0"
+log = "0.4.8"
+futures = "0.3.4"
+slog = "2.5.2"
+hex-literal = "0.2.1"
+av_store = { package = "polkadot-availability-store", path = "../availability-store", optional = true }
+consensus = { package = "polkadot-validation", path = "../validation", optional = true }
+polkadot-primitives = { path = "../primitives" }
+polkadot-runtime = { path = "../runtime/polkadot" }
+kusama-runtime = { path = "../runtime/kusama" }
+westend-runtime = { path = "../runtime/westend" }
+polkadot-network = { path = "../network", optional = true }
+polkadot-rpc = { path = "../rpc" }
+sp-io = { git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+sp-api = { git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+sp-runtime = { git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+sp-blockchain = { git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+sp-core = { git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+sc-client = { git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+sc-client-api = { git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+sc-client-db = { git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+sc-chain-spec = { git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+sc-executor = { git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+sc-network = { git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+consensus_common = { package = "sp-consensus", git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+grandpa = { package = "sc-finality-grandpa", git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+grandpa_primitives = { package = "sp-finality-grandpa", git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+inherents = { package = "sp-inherents", git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+service = { package = "sc-service", git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp", default-features = false }
+telemetry = { package = "sc-telemetry", git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+sc-transaction-pool = { git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+sp-transaction-pool = { git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+sc-keystore = { git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+pallet-babe = { git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+pallet-staking = { git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+im-online = { package = "pallet-im-online", git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+authority-discovery = { package = "sc-authority-discovery", git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+authority-discovery-primitives = { package = "sp-authority-discovery", git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+babe = { package = "sc-consensus-babe", git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+babe-primitives = { package = "sp-consensus-babe", git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+sp-block-builder = { git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+pallet-transaction-payment-rpc-runtime-api = { git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+system_rpc_runtime_api = { package = "frame-system-rpc-runtime-api", git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+codec = { package = "parity-scale-codec", version = "1.3.0" }
+sp-session = { git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+sp-offchain = { package = "sp-offchain", git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+prometheus-endpoint = { package = "substrate-prometheus-endpoint", git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+frame-benchmarking = { git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+
+[dev-dependencies]
+polkadot-test-runtime-client = { path = "../runtime/test-runtime/client" }
+sc-block-builder = { git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+env_logger = "0.7.0"
+
+[features]
+default = ["db", "full-node"]
+db = ["service/db"]
+runtime-benchmarks = ["polkadot-runtime/runtime-benchmarks", "kusama-runtime/runtime-benchmarks", "westend-runtime/runtime-benchmarks"]
+full-node = ["av_store", "consensus", "polkadot-network"]

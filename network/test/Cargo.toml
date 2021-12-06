@@ -1,0 +1,22 @@
+[package]
+name = "polkadot-network-test"
+version = "0.8.0"
+license = "GPL-3.0"
+authors = ["Parity Technologies <admin@parity.io>"]
+edition = "2018"
+
+[dependencies]
+log = "0.4.8"
+parking_lot = "0.10.0"
+futures = "0.3.1"
+rand = "0.7.2"
+sc-network = { git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+sc-network-test = { git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+sp-consensus = { git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+sc-client = { git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+sc-client-api = { git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+sp-blockchain = { git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+sp-runtime = { git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+sp-core = { git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+sc-block-builder = { git = "https://github.com/paritytech/substrate", branch = "andre/westend-babe-timewarp" }
+polkadot-test-runtime-client = { path = "../../runtime/test-runtime/client" }
