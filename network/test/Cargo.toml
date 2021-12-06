@@ -1,0 +1,23 @@
+[package]
+name = "polkadot-network-test"
+version = "0.8.19"
+license = "GPL-3.0"
+authors = ["Parity Technologies <admin@parity.io>"]
+edition = "2018"
+
+[dependencies]
+log = "0.4.8"
+parking_lot = "0.10.0"
+futures = "0.3.1"
+rand = "0.7.2"
+sc-consensus = { git = "https://github.com/paritytech/substrate", branch = "tka-send-notifications" }
+sc-network = { git = "https://github.com/paritytech/substrate", branch = "tka-send-notifications" }
+sc-service = { git = "https://github.com/paritytech/substrate", features = ["test-helpers"], branch = "tka-send-notifications" }
+sc-network-test = { git = "https://github.com/paritytech/substrate", branch = "tka-send-notifications" }
+sp-consensus = { git = "https://github.com/paritytech/substrate", branch = "tka-send-notifications" }
+sc-client-api = { git = "https://github.com/paritytech/substrate", branch = "tka-send-notifications" }
+sp-blockchain = { git = "https://github.com/paritytech/substrate", branch = "tka-send-notifications" }
+sp-runtime = { git = "https://github.com/paritytech/substrate", branch = "tka-send-notifications" }
+sp-core = { git = "https://github.com/paritytech/substrate", branch = "tka-send-notifications" }
+sc-block-builder = { git = "https://github.com/paritytech/substrate", branch = "tka-send-notifications" }
+polkadot-test-runtime-client = { path = "../../runtime/test-runtime/client" }
