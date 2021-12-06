@@ -1,0 +1,344 @@
+[[bin]]
+name = "polkadot"
+path = "src/main.rs"
+
+[package]
+name = "polkadot"
+description = "Implementation of a https://polkadot.network node in Rust based on the Substrate framework."
+license = "GPL-3.0-only"
+version = "0.9.5"
+authors = ["Parity Technologies <admin@parity.io>"]
+edition = "2018"
+readme = "README.md"
+
+[dependencies]
+polkadot-cli = { path = "cli", features = [ "kusama-native", "westend-native", "rococo-native" ]  }
+color-eyre = { version = "0.5.11", default-features = false }
+parity-util-mem = { version = "*", default-features = false, features = ["jemalloc-global"] }
+
+[dev-dependencies]
+assert_cmd = "1.0.2"
+nix = "0.19.1"
+tempfile = "3.2.0"
+
+[workspace]
+members = [
+	"cli",
+	"core-primitives",
+	"erasure-coding",
+	"primitives",
+	"runtime/common",
+	"runtime/common/slot_range_helper",
+	"runtime/parachains",
+	"runtime/polkadot",
+	"runtime/kusama",
+	"runtime/rococo",
+	"runtime/westend",
+	"runtime/test-runtime",
+	"statement-table",
+	"xcm",
+	"xcm/xcm-builder",
+	"xcm/xcm-executor",
+	"xcm/pallet-xcm",
+	"node/client",
+	"node/collation-generation",
+	"node/core/approval-voting",
+	"node/core/av-store",
+	"node/core/backing",
+	"node/core/bitfield-signing",
+	"node/core/candidate-validation",
+	"node/core/chain-api",
+	"node/core/dispute-coordinator",
+	"node/core/dispute-participation",
+	"node/core/parachains-inherent",
+	"node/core/provisioner",
+	"node/core/pvf",
+	"node/core/runtime-api",
+	"node/network/approval-distribution",
+	"node/network/bridge",
+	"node/network/protocol",
+	"node/network/statement-distribution",
+	"node/network/bitfield-distribution",
+	"node/network/availability-distribution",
+	"node/network/availability-recovery",
+	"node/network/collator-protocol",
+	"node/network/gossip-support",
+	"node/overseer",
+	"node/primitives",
+	"node/service",
+	"node/subsystem",
+	"node/subsystem/dispatch-gen",
+	"node/subsystem-test-helpers",
+	"node/subsystem-util",
+	"node/jaeger",
+	"node/metered-channel",
+	"node/test/client",
+	"node/test/service",
+	"parachain/test-parachains",
+	"parachain/test-parachains/adder",
+	"parachain/test-parachains/adder/collator",
+]
+
+# We want to be able to build the bridge relayer without pulling it (and all of its
+# dependencies into the Polkadot workspace)
+exclude = ["bridges/relays/bin-substrate", "bridges/bin/rialto/runtime", "bridges/bin/millau/runtime"]
+
+[badges]
+maintenance = { status = "actively-developed" }
+
+# make sure dev builds with backtrace do
+# not slow us down
+[profile.dev.package.backtrace]
+opt-level = 3
+
+[profile.release]
+# Polkadot runtime requires unwinding.
+panic = "unwind"
+
+[features]
+runtime-benchmarks= [ "polkadot-cli/runtime-benchmarks" ]
+try-runtime = [ "polkadot-cli/try-runtime" ]
+[patch."https://github.com/paritytech/substrate"]
+node-template ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+frame-benchmarking ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+frame-support ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+frame-metadata ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-core ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+max-encoded-len ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+max-encoded-len-derive ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-debug-derive ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-externalities ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-std ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-storage ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-runtime-interface ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-runtime-interface-proc-macro ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-tracing ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-wasm-interface ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-io ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-keystore ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-maybe-compressed-blob ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-state-machine ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-panic-handler ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-trie ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-runtime ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-application-crypto ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-arithmetic ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-api ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-api-proc-macro ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-version ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-version-proc-macro ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-test-primitives ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+substrate-test-runtime-client ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-block-builder ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-client-api ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+substrate-prometheus-endpoint ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-executor ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-executor-common ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-allocator ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-serializer ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-executor-wasmi ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-executor-wasmtime ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-tasks ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-runtime-test ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-sandbox ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+substrate-wasm-builder ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-tracing ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-rpc-server ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-telemetry ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-tracing-proc-macro ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-block-builder ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-inherents ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-blockchain ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-consensus ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-utils ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-database ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-rpc ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+substrate-test-runtime ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+frame-system ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+frame-system-rpc-runtime-api ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-babe ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-authorship ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-authorship ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-session ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-timestamp ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-timestamp ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-session ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-staking ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-consensus-babe ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-consensus-slots ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-consensus-vrf ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+frame-election-provider-support ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-npos-elections ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-npos-elections-compact ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+substrate-test-utils ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+substrate-test-utils-derive ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-service ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-chain-spec ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-chain-spec-derive ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-consensus-babe ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+fork-tree ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-consensus-epochs ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-consensus ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-consensus-slots ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-consensus-uncles ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-keystore ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-network ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-peerset ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-keyring ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-network-test ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-finality-grandpa ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-network-gossip ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-finality-grandpa ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-chain-spec ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-client-db ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-state-db ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-informant ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-transaction-pool ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-light ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-offchain ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-offchain ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-transaction-pool ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-transaction-graph ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+substrate-test-runtime-transaction-pool ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-rpc ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-rpc-api ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-cli ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-transaction-storage-proof ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-balances ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-transaction-payment ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-offences ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-staking ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-staking-reward-curve ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-consensus-aura ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+substrate-test-client ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-runtime-interface-test-wasm ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+frame-support-procedural ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+frame-support-procedural-tools ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+frame-support-procedural-tools-derive ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+frame-benchmarking-cli ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+node-template-runtime ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+frame-executive ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-indices ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+frame-system-benchmarking ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-aura ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-grandpa ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-randomness-collective-flip ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-sudo ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-template ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-transaction-payment-rpc-runtime-api ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-transaction-payment-rpc ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-basic-authorship ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-proposer-metrics ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-consensus-aura ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+substrate-frame-rpc-system ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+substrate-build-script-utils ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+node-bench ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+node-primitives ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+node-runtime ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+frame-try-runtime ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-assets ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-authority-discovery ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-authority-discovery ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-bounties ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-treasury ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-collective ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-contracts ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-contracts-primitives ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-contracts-proc-macro ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-contracts-rpc-runtime-api ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-democracy ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-scheduler ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-election-provider-multi-phase ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-elections-phragmen ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-gilt ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-identity ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-im-online ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-lottery ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+frame-support-test ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-membership ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-mmr ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-mmr-primitives ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-multisig ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-offences-benchmarking ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-proxy ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-utility ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-recovery ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-session-benchmarking ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-society ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-tips ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-transaction-storage ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-uniques ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-vesting ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+node-testing ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+node-executor ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+node-browser-testing ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+node-cli ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+substrate-browser-utils ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+node-inspect ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+node-rpc ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-contracts-rpc ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-mmr-rpc ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-consensus-babe-rpc ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-finality-grandpa-rpc ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-sync-state-rpc ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-authority-discovery ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-finality-grandpa-warp-sync ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+try-runtime-cli ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+remote-externalities ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-service-test ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+substrate-frame-cli ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+test-runner-example ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-consensus-manual-seal ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+test-runner ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+node-rpc-client ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+chain-spec-builder ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+subkey ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sc-consensus-pow ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-consensus-pow ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-atomic-swap ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-elections ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-example ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-example-offchain-worker ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-example-parallel ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-nicks ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-node-authorization ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-scored-pool ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+pallet-staking-reward-fn ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-api-test ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-application-crypto-test ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-arithmetic-fuzzer ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-npos-elections-fuzzer ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-runtime-interface-test ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+sp-runtime-interface-test-wasm-deprecated ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+substrate-test-utils-test-crate ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+substrate-frame-rpc-support ={git = "https://github.com/andresilva/substrate" ,branch = "andre/tighter-grandpa-gossip" }
+
+# Configuration for building a .deb package - for use with `cargo-deb`
+[package.metadata.deb]
+name = "polkadot"
+extended-description = "Implementation of a https://polkadot.network node in Rust based on the Substrate framework."
+section = "misc"
+maintainer = "martin@parity.io"
+license-file = ["LICENSE", "0"]
+# https://www.debian.org/doc/debian-policy/ch-maintainerscripts.html
+maintainer-scripts = "scripts/packaging/deb-maintainer-scripts"
+assets = [
+	["target/release/polkadot", "/usr/bin/", "755"],
+	["scripts/packaging/polkadot.service", "/lib/systemd/system/", "644"]
+]
+conf-files = [
+	"/etc/default/polkadot"
+]
+
+# Configuration for building an .rpm package - for use with `cargo-rpm`
+[package.metadata.rpm]
+package = "polkadot"
+
+[package.metadata.rpm.cargo]
+buildflags = ["--release"]
+
+[package.metadata.rpm.targets]
+polkadot = { path = "/usr/bin/polkadot" }
+
+[package.metadata.rpm.files]
+"../scripts/packaging/polkadot.service" = { path = "/usr/lib/systemd/system/polkadot.service", mode = "644" }
