@@ -41,7 +41,7 @@ use polkadot_node_subsystem_util::metrics::{self, prometheus};
 use polkadot_parachain::primitives::{ValidationParams, ValidationResult as WasmValidationResult};
 use polkadot_primitives::v1::{
 	CandidateCommitments, CandidateDescriptor, Hash, OccupiedCoreAssumption,
-	PersistedValidationData, ValidationCode, ValidationCodeHash,
+	PersistedValidationData, ValidationCode,
 };
 
 use parity_scale_codec::Encode;
@@ -164,7 +164,6 @@ where
 					match res {
 						Ok(x) => {
 							metrics.on_validation_event(&x);
-
 							if let Err(_e) = response_sender.send(x) {
 								tracing::warn!(
 									target: LOG_TARGET,
@@ -350,19 +349,11 @@ async fn validate_candidate_exhaustive(
 ) -> SubsystemResult<Result<ValidationResult, ValidationFailed>> {
 	let _timer = metrics.time_validate_candidate_exhaustive();
 
-	let validation_code_hash = validation_code.hash();
-	tracing::debug!(
-		target: LOG_TARGET,
-		?validation_code_hash,
-		para_id = ?descriptor.para_id,
-		"About to validate a candidate.",
-	);
-
 	if let Err(e) = perform_basic_checks(
 		&descriptor,
 		persisted_validation_data.max_pov_size,
 		&*pov,
-		&validation_code_hash,
+		&validation_code,
 	) {
 		return Ok(Ok(ValidationResult::Invalid(e)))
 	}
@@ -487,9 +478,10 @@ fn perform_basic_checks(
 	candidate: &CandidateDescriptor,
 	max_pov_size: u32,
 	pov: &PoV,
-	validation_code_hash: &ValidationCodeHash,
+	validation_code: &ValidationCode,
 ) -> Result<(), InvalidCandidate> {
 	let pov_hash = pov.hash();
+	let validation_code_hash = validation_code.hash();
 
 	let encoded_pov_size = pov.encoded_size();
 	if encoded_pov_size > max_pov_size as usize {
@@ -500,7 +492,7 @@ fn perform_basic_checks(
 		return Err(InvalidCandidate::PoVHashMismatch)
 	}
 
-	if *validation_code_hash != candidate.validation_code_hash {
+	if validation_code_hash != candidate.validation_code_hash {
 		return Err(InvalidCandidate::CodeHashMismatch)
 	}
 

@@ -15,7 +15,7 @@
 // along with Polkadot.  If not, see <http://www.gnu.org/licenses/>.
 
 use frame_support::weights::Weight;
-use xcm::latest::{MultiLocation, Response};
+use xcm::v0::{MultiLocation, Response};
 
 /// Define what needs to be done upon receiving a query response.
 pub trait OnResponse {

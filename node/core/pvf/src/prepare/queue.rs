@@ -212,13 +212,6 @@ async fn handle_to_queue(queue: &mut Queue, to_queue: ToQueue) -> Result<(), Fat
 }
 
 async fn handle_enqueue(queue: &mut Queue, priority: Priority, pvf: Pvf) -> Result<(), Fatal> {
-	tracing::debug!(
-		target: LOG_TARGET,
-		validation_code_hash = ?pvf.code_hash,
-		?priority,
-		"PVF is enqueued for preparation.",
-	);
-
 	let artifact_id = pvf.as_artifact_id();
 	if never!(
 		queue.artifact_id_to_job.contains_key(&artifact_id),
@@ -261,14 +254,8 @@ async fn handle_amend(
 	artifact_id: ArtifactId,
 ) -> Result<(), Fatal> {
 	if let Some(&job) = queue.artifact_id_to_job.get(&artifact_id) {
-		tracing::debug!(
-			target: LOG_TARGET,
-			validation_code_hash = ?artifact_id.code_hash,
-			?priority,
-			"amending preparation priority.",
-		);
-
 		let mut job_data: &mut JobData = &mut queue.jobs[job];
+
 		if job_data.priority < priority {
 			// The new priority is higher. We should do two things:
 			// - if the worker was already spawned with the background prio and the new one is not
@@ -362,14 +349,6 @@ async fn handle_worker_concluded(
 
 	queue.artifact_id_to_job.remove(&artifact_id);
 
-	tracing::debug!(
-		target: LOG_TARGET,
-		validation_code_hash = ?artifact_id.code_hash,
-		?worker,
-		?rip,
-		"prepare worker concluded",
-	);
-
 	reply(&mut queue.from_queue_tx, FromQueue::Prepared(artifact_id))?;
 
 	// Figure out what to do with the worker.
@@ -401,9 +380,8 @@ async fn handle_worker_concluded(
 }
 
 async fn handle_worker_rip(queue: &mut Queue, worker: Worker) -> Result<(), Fatal> {
-	tracing::debug!(target: LOG_TARGET, ?worker, "prepare worker ripped");
-
 	let worker_data = queue.workers.remove(worker);
+
 	if let Some(WorkerData { job: Some(job), .. }) = worker_data {
 		// This is an edge case where the worker ripped after we sent assignment but before it
 		// was received by the pool.

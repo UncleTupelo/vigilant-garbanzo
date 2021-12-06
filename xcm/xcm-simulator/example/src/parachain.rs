@@ -19,7 +19,7 @@
 use codec::{Decode, Encode};
 use frame_support::{
 	construct_runtime, parameter_types,
-	traits::Everything,
+	traits::{All, AllowAll},
 	weights::{constants::WEIGHT_PER_SECOND, Weight},
 };
 use sp_core::H256;
@@ -35,10 +35,19 @@ use polkadot_core_primitives::BlockNumber as RelayBlockNumber;
 use polkadot_parachain::primitives::{
 	DmpMessageHandler, Id as ParaId, Sibling, XcmpMessageFormat, XcmpMessageHandler,
 };
-use xcm::{latest::prelude::*, VersionedXcm};
+use xcm::{
+	v0::{
+		Error as XcmError, ExecuteXcm,
+		Junction::{Parachain, Parent},
+		MultiAsset,
+		MultiLocation::{self, X1},
+		NetworkId, Outcome, Xcm,
+	},
+	VersionedXcm,
+};
 use xcm_builder::{
 	AccountId32Aliases, AllowUnpaidExecutionFrom, CurrencyAdapter as XcmCurrencyAdapter,
-	EnsureXcmOrigin, FixedRateOfFungible, FixedWeightBounds, IsConcrete, LocationInverter,
+	EnsureXcmOrigin, FixedRateOfConcreteFungible, FixedWeightBounds, IsConcrete, LocationInverter,
 	NativeAsset, ParentIsDefault, SiblingParachainConvertsVia, SignedAccountId32AsNative,
 	SignedToAccountId32, SovereignSignedViaLocation,
 };
@@ -71,7 +80,7 @@ impl frame_system::Config for Runtime {
 	type OnNewAccount = ();
 	type OnKilledAccount = ();
 	type DbWeight = ();
-	type BaseCallFilter = Everything;
+	type BaseCallFilter = AllowAll;
 	type SystemWeightInfo = ();
 	type SS58Prefix = ();
 	type OnSetCode = ();
@@ -101,7 +110,7 @@ parameter_types! {
 }
 
 parameter_types! {
-	pub const KsmLocation: MultiLocation = MultiLocation::parent();
+	pub const KsmLocation: MultiLocation = MultiLocation::X1(Parent);
 	pub const RelayNetwork: NetworkId = NetworkId::Kusama;
 	pub Ancestry: MultiLocation = Parachain(MsgQueue::parachain_id().into()).into();
 }
@@ -120,14 +129,14 @@ pub type XcmOriginToCallOrigin = (
 
 parameter_types! {
 	pub const UnitWeightCost: Weight = 1;
-	pub KsmPerSecond: (AssetId, u128) = (Concrete(Parent.into()), 1);
+	pub KsmPerSecond: (MultiLocation, u128) = (X1(Parent), 1);
 }
 
 pub type LocalAssetTransactor =
 	XcmCurrencyAdapter<Balances, IsConcrete<KsmLocation>, LocationToAccountId, AccountId, ()>;
 
 pub type XcmRouter = super::ParachainXcmRouter<MsgQueue>;
-pub type Barrier = AllowUnpaidExecutionFrom<Everything>;
+pub type Barrier = AllowUnpaidExecutionFrom<All<MultiLocation>>;
 
 pub struct XcmConfig;
 impl Config for XcmConfig {
@@ -140,7 +149,7 @@ impl Config for XcmConfig {
 	type LocationInverter = LocationInverter<Ancestry>;
 	type Barrier = Barrier;
 	type Weigher = FixedWeightBounds<UnitWeightCost, Call>;
-	type Trader = FixedRateOfFungible<KsmPerSecond, ()>;
+	type Trader = FixedRateOfConcreteFungible<KsmPerSecond, ()>;
 	type ResponseHandler = ();
 }
 
@@ -165,11 +174,6 @@ pub mod mock_msg_queue {
 	#[pallet::storage]
 	#[pallet::getter(fn parachain_id)]
 	pub(super) type ParachainId<T: Config> = StorageValue<_, ParaId, ValueQuery>;
-
-	#[pallet::storage]
-	#[pallet::getter(fn received_dmp)]
-	/// A queue of received DMP messages
-	pub(super) type ReceivedDmp<T: Config> = StorageValue<_, Vec<Xcm<T::Call>>, ValueQuery>;
 
 	impl<T: Config> Get<ParaId> for Pallet<T> {
 		fn get() -> ParaId {
@@ -215,8 +219,8 @@ pub mod mock_msg_queue {
 			let hash = Encode::using_encoded(&xcm, T::Hashing::hash);
 			let (result, event) = match Xcm::<T::Call>::try_from(xcm) {
 				Ok(xcm) => {
-					let location = MultiLocation::new(1, X1(Parachain(sender.into())));
-					match T::XcmExecutor::execute_xcm(location, xcm, max_weight) {
+					let location = (Parent, Parachain(sender.into()));
+					match T::XcmExecutor::execute_xcm(location.into(), xcm, max_weight) {
 						Outcome::Error(e) => (Err(e.clone()), Event::Fail(Some(hash), e)),
 						Outcome::Complete(w) => (Ok(w), Event::Success(Some(hash))),
 						// As far as the caller is concerned, this was dispatched without error, so
@@ -271,8 +275,7 @@ pub mod mock_msg_queue {
 						Self::deposit_event(Event::UnsupportedVersion(id));
 					},
 					Ok(Ok(x)) => {
-						let outcome = T::XcmExecutor::execute_xcm(Parent.into(), x.clone(), limit);
-						<ReceivedDmp<T>>::append(x);
+						let outcome = T::XcmExecutor::execute_xcm(Parent.into(), x, limit);
 						Self::deposit_event(Event::ExecutedDownward(id, outcome));
 					},
 				}
@@ -294,10 +297,10 @@ impl pallet_xcm::Config for Runtime {
 	type SendXcmOrigin = EnsureXcmOrigin<Origin, LocalOriginToLocation>;
 	type XcmRouter = XcmRouter;
 	type ExecuteXcmOrigin = EnsureXcmOrigin<Origin, LocalOriginToLocation>;
-	type XcmExecuteFilter = Everything;
+	type XcmExecuteFilter = All<(MultiLocation, Xcm<Call>)>;
 	type XcmExecutor = XcmExecutor<XcmConfig>;
 	type XcmTeleportFilter = ();
-	type XcmReserveTransferFilter = Everything;
+	type XcmReserveTransferFilter = All<(MultiLocation, Vec<MultiAsset>)>;
 	type Weigher = FixedWeightBounds<UnitWeightCost, Call>;
 	type LocationInverter = LocationInverter<Ancestry>;
 }

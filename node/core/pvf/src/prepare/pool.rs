@@ -194,7 +194,6 @@ fn handle_to_pool(
 ) {
 	match to_pool {
 		ToPool::Spawn => {
-			tracing::debug!(target: LOG_TARGET, "spawning a new prepare worker");
 			mux.push(spawn_worker_task(program_path.to_owned(), spawn_timeout).boxed());
 		},
 		ToPool::StartWork { worker, code, artifact_path, background_priority } => {
@@ -225,7 +224,6 @@ fn handle_to_pool(
 			}
 		},
 		ToPool::Kill(worker) => {
-			tracing::debug!(target: LOG_TARGET, ?worker, "killing prepare worker");
 			// It may be absent if it were previously already removed by `purge_dead`.
 			let _ = spawned.remove(worker);
 		},

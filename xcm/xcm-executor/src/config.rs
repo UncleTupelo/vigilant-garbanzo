@@ -22,7 +22,7 @@ use frame_support::{
 	dispatch::{Dispatchable, Parameter},
 	weights::{GetDispatchInfo, PostDispatchInfo},
 };
-use xcm::latest::SendXcm;
+use xcm::v0::SendXcm;
 
 /// The trait to parameterize the `XcmExecutor`.
 pub trait Config {

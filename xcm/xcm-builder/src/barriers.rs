@@ -19,14 +19,10 @@
 use frame_support::{ensure, traits::Contains, weights::Weight};
 use polkadot_parachain::primitives::IsSystem;
 use sp_std::{marker::PhantomData, result::Result};
-use xcm::latest::{Junction, Junctions, MultiLocation, Order, Xcm};
+use xcm::v0::{Junction, MultiLocation, Order, Xcm};
 use xcm_executor::traits::{OnResponse, ShouldExecute};
 
 /// Execution barrier that just takes `shallow_weight` from `weight_credit`.
-///
-/// Useful to allow XCM execution by local chain users via extrinsics.
-/// E.g. `pallet_xcm::reserve_asset_transfer` to transfer a reserve asset
-/// out of the local chain to another one.
 pub struct TakeWeightCredit;
 impl ShouldExecute for TakeWeightCredit {
 	fn should_execute<Call>(
@@ -43,9 +39,6 @@ impl ShouldExecute for TakeWeightCredit {
 
 /// Allows execution from `origin` if it is contained in `T` (i.e. `T::Contains(origin)`) taking payments into
 /// account.
-///
-/// Only allows for `TeleportAsset`, `WithdrawAsset` and `ReserveAssetDeposit` XCMs because they are the only ones
-/// that place assets in the Holding Register to pay for execution.
 pub struct AllowTopLevelPaidExecutionFrom<T>(PhantomData<T>);
 impl<T: Contains<MultiLocation>> ShouldExecute for AllowTopLevelPaidExecutionFrom<T> {
 	fn should_execute<Call>(
@@ -58,9 +51,9 @@ impl<T: Contains<MultiLocation>> ShouldExecute for AllowTopLevelPaidExecutionFro
 		ensure!(T::contains(origin), ());
 		ensure!(top_level, ());
 		match message {
-			Xcm::ReceiveTeleportedAsset { effects, .. } |
+			Xcm::TeleportAsset { effects, .. } |
 			Xcm::WithdrawAsset { effects, .. } |
-			Xcm::ReserveAssetDeposited { effects, .. }
+			Xcm::ReserveAssetDeposit { effects, .. }
 				if matches!(
 					effects.first(),
 					Some(Order::BuyExecution { debt, ..}) if *debt >= shallow_weight
@@ -91,11 +84,7 @@ impl<T: Contains<MultiLocation>> ShouldExecute for AllowUnpaidExecutionFrom<T> {
 pub struct IsChildSystemParachain<ParaId>(PhantomData<ParaId>);
 impl<ParaId: IsSystem + From<u32>> Contains<MultiLocation> for IsChildSystemParachain<ParaId> {
 	fn contains(l: &MultiLocation) -> bool {
-		matches!(
-			l.interior(),
-			Junctions::X1(Junction::Parachain(id))
-				if ParaId::from(*id).is_system() && l.parent_count() == 0,
-		)
+		matches!(l, MultiLocation::X1(Junction::Parachain(id)) if ParaId::from(*id).is_system())
 	}
 }
 

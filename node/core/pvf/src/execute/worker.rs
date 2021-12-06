@@ -15,7 +15,7 @@
 // along with Polkadot.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::{
-	artifacts::{Artifact, ArtifactPathId},
+	artifacts::Artifact,
 	executor_intf::TaskExecutor,
 	worker_common::{
 		bytes_to_path, framed_recv, framed_send, path_to_bytes, spawn_with_program_path,
@@ -68,7 +68,7 @@ pub enum Outcome {
 /// returns the outcome.
 pub async fn start_work(
 	worker: IdleWorker,
-	artifact: ArtifactPathId,
+	artifact_path: PathBuf,
 	validation_params: Vec<u8>,
 ) -> Outcome {
 	let IdleWorker { mut stream, pid } = worker;
@@ -76,47 +76,22 @@ pub async fn start_work(
 	tracing::debug!(
 		target: LOG_TARGET,
 		worker_pid = %pid,
-		validation_code_hash = ?artifact.id.code_hash,
 		"starting execute for {}",
-		artifact.path.display(),
+		artifact_path.display(),
 	);
 
-	if let Err(error) = send_request(&mut stream, &artifact.path, &validation_params).await {
-		tracing::warn!(
-			target: LOG_TARGET,
-			worker_pid = %pid,
-			validation_code_hash = ?artifact.id.code_hash,
-			?error,
-			"failed to send an execute request",
-		);
+	if send_request(&mut stream, &artifact_path, &validation_params).await.is_err() {
 		return Outcome::IoErr
 	}
 
 	let response = futures::select! {
 		response = recv_response(&mut stream).fuse() => {
 			match response {
-				Err(error) => {
-					tracing::warn!(
-						target: LOG_TARGET,
-						worker_pid = %pid,
-						validation_code_hash = ?artifact.id.code_hash,
-						?error,
-						"failed to recv an execute response",
-					);
-					return Outcome::IoErr
-				},
+				Err(_err) => return Outcome::IoErr,
 				Ok(response) => response,
 			}
 		},
-		_ = Delay::new(EXECUTION_TIMEOUT).fuse() => {
-			tracing::warn!(
-				target: LOG_TARGET,
-				worker_pid = %pid,
-				validation_code_hash = ?artifact.id.code_hash,
-				"execution worker exceeded alloted time for execution",
-			);
-			return Outcome::HardTimeout;
-		},
+		_ = Delay::new(EXECUTION_TIMEOUT).fuse() => return Outcome::HardTimeout,
 	};
 
 	match response {

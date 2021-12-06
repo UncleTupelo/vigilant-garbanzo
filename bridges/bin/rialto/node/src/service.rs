@@ -33,6 +33,7 @@
 use rialto_runtime::{self, opaque::Block, RuntimeApi};
 use sc_client_api::{ExecutorProvider, RemoteBackend};
 use sc_consensus_aura::{ImportQueueParams, SlotProportion, StartAuraParams};
+use sc_executor::native_executor_instance;
 pub use sc_executor::NativeExecutor;
 
 use sc_keystore::LocalKeystore;
@@ -43,19 +44,12 @@ use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
 use std::{sync::Arc, time::Duration};
 
 // Our native executor instance.
-pub struct Executor;
-
-impl sc_executor::NativeExecutionDispatch for Executor {
-	type ExtendHostFunctions = frame_benchmarking::benchmarking::HostFunctions;
-
-	fn dispatch(method: &str, data: &[u8]) -> Option<Vec<u8>> {
-		rialto_runtime::api::dispatch(method, data)
-	}
-
-	fn native_version() -> sc_executor::NativeVersion {
-		rialto_runtime::native_version()
-	}
-}
+native_executor_instance!(
+	pub Executor,
+	rialto_runtime::api::dispatch,
+	rialto_runtime::native_version,
+	frame_benchmarking::benchmarking::HostFunctions,
+);
 
 type FullClient = sc_service::TFullClient<Block, RuntimeApi, Executor>;
 type FullBackend = sc_service::TFullBackend<Block>;

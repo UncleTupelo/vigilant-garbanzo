@@ -21,20 +21,19 @@ use std::{
 };
 
 use futures::{
-	channel::oneshot,
+	channel::{mpsc, oneshot},
 	future::{poll_fn, BoxFuture},
-	pin_mut,
 	stream::{FusedStream, FuturesUnordered, StreamExt},
-	Future, FutureExt, Stream,
+	FutureExt, Stream,
 };
 use lru::LruCache;
 
 use polkadot_node_network_protocol::{
 	authority_discovery::AuthorityDiscovery,
 	request_response::{
-		incoming::{OutgoingResponse, OutgoingResponseSender},
+		request::{OutgoingResponse, OutgoingResponseSender},
 		v1::{DisputeRequest, DisputeResponse},
-		IncomingRequest, IncomingRequestReceiver,
+		IncomingRequest,
 	},
 	PeerId, UnifiedReputationChange as Rep,
 };
@@ -51,7 +50,7 @@ use crate::{
 };
 
 mod error;
-use self::error::{log_error, NonFatal, NonFatalResult, Result};
+use self::error::{log_error, Fatal, FatalResult, NonFatal, NonFatalResult, Result};
 
 const COST_INVALID_REQUEST: Rep = Rep::CostMajor("Received message could not be decoded.");
 const COST_INVALID_SIGNATURE: Rep = Rep::Malicious("Signatures were invalid.");
@@ -73,7 +72,7 @@ pub struct DisputesReceiver<Sender, AD> {
 	sender: Sender,
 
 	/// Channel to retrieve incoming requests from.
-	receiver: IncomingRequestReceiver<DisputeRequest>,
+	receiver: mpsc::Receiver<sc_network::config::IncomingRequest>,
 
 	/// Authority discovery service:
 	authority_discovery: AD,
@@ -104,27 +103,26 @@ enum MuxedMessage {
 	ConfirmedImport(NonFatalResult<(PeerId, ImportStatementsResult)>),
 
 	/// A new request has arrived and should be handled.
-	NewRequest(IncomingRequest<DisputeRequest>),
+	NewRequest(sc_network::config::IncomingRequest),
 }
 
 impl MuxedMessage {
 	async fn receive(
 		pending_imports: &mut PendingImports,
-		pending_requests: &mut IncomingRequestReceiver<DisputeRequest>,
-	) -> Result<MuxedMessage> {
+		pending_requests: &mut mpsc::Receiver<sc_network::config::IncomingRequest>,
+	) -> FatalResult<MuxedMessage> {
 		poll_fn(|ctx| {
-			let next_req = pending_requests.recv(|| vec![COST_INVALID_REQUEST]);
-			pin_mut!(next_req);
-			if let Poll::Ready(r) = next_req.poll(ctx) {
-				return match r {
-					Err(e) => Poll::Ready(Err(e.into())),
-					Ok(v) => Poll::Ready(Ok(Self::NewRequest(v))),
-				}
+			if let Poll::Ready(v) = pending_requests.poll_next_unpin(ctx) {
+				let r = match v {
+					None => Err(Fatal::RequestChannelFinished),
+					Some(msg) => Ok(MuxedMessage::NewRequest(msg)),
+				};
+				return Poll::Ready(r)
 			}
 			// In case of Ready(None) return `Pending` below - we want to wait for the next request
 			// in that case.
 			if let Poll::Ready(Some(v)) = pending_imports.poll_next_unpin(ctx) {
-				return Poll::Ready(Ok(Self::ConfirmedImport(v)))
+				return Poll::Ready(Ok(MuxedMessage::ConfirmedImport(v)))
 			}
 			Poll::Pending
 		})
@@ -139,7 +137,7 @@ where
 	/// Create a new receiver which can be `run`.
 	pub fn new(
 		sender: Sender,
-		receiver: IncomingRequestReceiver<DisputeRequest>,
+		receiver: mpsc::Receiver<sc_network::config::IncomingRequest>,
 		authority_discovery: AD,
 		metrics: Metrics,
 	) -> Self {
@@ -167,12 +165,15 @@ where
 		loop {
 			match log_error(self.run_inner().await) {
 				Ok(()) => {},
-				Err(fatal) => {
+				Err(Fatal::RequestChannelFinished) => {
 					tracing::debug!(
 						target: LOG_TARGET,
-						error = ?fatal,
-						"Shutting down"
+						"Incoming request stream exhausted - shutting down?"
 					);
+					return
+				},
+				Err(err) => {
+					tracing::warn!(target: LOG_TARGET, ?err, "Dispute receiver died.");
 					return
 				},
 			}
@@ -183,7 +184,7 @@ where
 	async fn run_inner(&mut self) -> Result<()> {
 		let msg = MuxedMessage::receive(&mut self.pending_imports, &mut self.receiver).await?;
 
-		let incoming = match msg {
+		let raw = match msg {
 			// We need to clean up futures, to make sure responses are sent:
 			MuxedMessage::ConfirmedImport(m_bad) => {
 				self.ban_bad_peer(m_bad)?;
@@ -194,20 +195,24 @@ where
 
 		self.metrics.on_received_request();
 
-		let peer = incoming.peer;
+		let peer = raw.peer;
 
 		// Only accept messages from validators:
-		if self.authority_discovery.get_authority_id_by_peer_id(peer).await.is_none() {
-			incoming
-				.send_outgoing_response(OutgoingResponse {
+		if self.authority_discovery.get_authority_id_by_peer_id(raw.peer).await.is_none() {
+			raw.pending_response
+				.send(sc_network::config::OutgoingResponse {
 					result: Err(()),
-					reputation_changes: vec![COST_NOT_A_VALIDATOR],
+					reputation_changes: vec![COST_NOT_A_VALIDATOR.into_base_rep()],
 					sent_feedback: None,
 				})
 				.map_err(|_| NonFatal::SendResponse(peer))?;
 
 			return Err(NonFatal::NotAValidator(peer).into())
 		}
+
+		let incoming =
+			IncomingRequest::<DisputeRequest>::try_from_raw(raw, vec![COST_INVALID_REQUEST])
+				.map_err(NonFatal::FromRawRequest)?;
 
 		// Immediately drop requests from peers that already have requests in flight or have
 		// been banned recently (flood protection):

@@ -25,7 +25,7 @@ use polkadot_primitives::v1::{
 	CandidateHash, CandidateReceipt, CommittedCandidateReceipt, Hash, Id as ParaId, ValidatorIndex,
 };
 
-use super::{IsRequest, Protocol};
+use super::{request::IsRequest, Protocol};
 
 /// Request an availability chunk.
 #[derive(Debug, Copy, Clone, Encode, Decode)]
