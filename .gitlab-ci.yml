@@ -1,0 +1,146 @@
+# .gitlab-ci.yml
+#
+# polkadot
+#
+# pipelines can be triggered manually in the web
+# setting DEPLOY_TAG will only deploy the tagged image
+#
+# please do not add new jobs without "rules:" and "*-env". There are &rules-test for everything,
+# &rules-pr-only preset. And "kubernetes-env" with "docker-env" to set a runner
+# which executes the job.
+
+stages:
+  - test
+  - build
+  - publish
+  - deploy
+
+image:                             paritytech/ci-linux:production
+
+workflow:
+  rules:
+    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_BRANCH
+
+variables:
+  GIT_STRATEGY:                    fetch
+  GIT_DEPTH:                       100
+  CI_SERVER_NAME:                  "GitLab CI"
+  DOCKER_OS:                       "debian:stretch"
+  ARCH:                            "x86_64"
+
+default:
+  cache:                           {}
+
+.collect-artifacts:                &collect-artifacts
+  artifacts:
+    name:                          "${CI_JOB_NAME}_${CI_COMMIT_REF_NAME}"
+    when:                          on_success
+    expire_in:                     28 days
+    paths:
+      - ./artifacts/
+
+.kubernetes-env:                   &kubernetes-env
+  retry:
+    max: 2
+    when:
+      - runner_system_failure
+      - unknown_failure
+      - api_failure
+  interruptible:                   true
+  tags:
+    - kubernetes-parity-build
+
+.docker-env:                       &docker-env
+  retry:
+    max: 2
+    when:
+      - runner_system_failure
+      - unknown_failure
+      - api_failure
+  interruptible:                   true
+  tags:
+    - linux-docker
+
+.compiler-info:                    &compiler-info
+  before_script:
+    - rustup show
+    - cargo --version
+    - sccache -s
+
+.rules-test:                       &rules-test
+  # these jobs run always*
+  rules:
+    - if: $CI_COMMIT_REF_NAME == "rococo-v1"
+      when: never
+    - when: always
+
+.pr-only:                          &rules-pr-only
+  # these jobs run only on PRs
+  rules:
+    - if: $CI_COMMIT_REF_NAME == "rococo-v1"
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
+    - if: $CI_COMMIT_REF_NAME =~ /^[0-9]+$/                         # PRs
+
+build-rustdoc:
+  stage:                           build
+  <<:                              *docker-env
+  <<:                              *rules-test
+  variables:
+    SKIP_WASM_BUILD:               1
+  artifacts:
+    name:                          "${CI_JOB_NAME}_${CI_COMMIT_REF_NAME}-doc"
+    when:                          on_success
+    expire_in:                     7 days
+    paths:
+    - ./crate-docs/
+  script:
+    # FIXME: it fails with `RUSTDOCFLAGS="-Dwarnings"` and `--all-features`
+    - time cargo doc --no-deps --workspace --verbose
+    - rm -f ./target/doc/.lock
+    - mv ./target/doc ./crate-docs
+    # FIXME: remove me after CI image gets nonroot
+    - chown -R nonroot:nonroot ./crate-docs
+    - echo "<meta http-equiv=refresh content=0;url=sc_service/index.html>" > ./crate-docs/index.html
+    - sccache -s
+
+publish-rustdoc:
+  stage:                           publish
+  <<:                              *kubernetes-env
+  image:                           paritytech/tools:latest
+  variables:
+    GIT_DEPTH:                     100
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_REF_NAME == "master"
+    - if: $CI_COMMIT_REF_NAME == "master"
+    # FIXME: remove me
+    - if: $CI_COMMIT_REF_NAME =~ /^[0-9]+$/                         # PRs
+  script:
+    - rm -rf /tmp/*
+    # Set git config
+    - rm -rf .git/config
+    - git config user.email "devops-team@parity.io"
+    - git config user.name "${GITHUB_USER}"
+    - git config remote.origin.url "https://${GITHUB_TOKEN}@github.com/paritytech/polkadot.git"
+    - git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+    - git fetch origin gh-pages
+    # Save README and docs
+    - cp -r ./crate-docs/ /tmp/doc/
+    - cp README.md /tmp/doc/
+    - git checkout gh-pages
+    # Remove everything and restore generated docs and README
+    - rm -rf ./*
+    - mv /tmp/doc/* .
+    # Upload files
+    - git add --all --force
+    # `git commit` has an exit code of > 0 if there is nothing to commit.
+    # This causes GitLab to exit immediately and marks this job failed.
+    # We don't want to mark the entire job failed if there's nothing to
+    # publish though, hence the `|| true`.
+    - git commit -m "Updated docs for ${CI_COMMIT_REF_NAME}" ||
+        echo "___Nothing to commit___"
+    - git push origin gh-pages --force
+  after_script:
+    - rm -rf .git/ ./*
