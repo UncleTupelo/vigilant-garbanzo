@@ -1,0 +1,10 @@
+[package]
+name = "polkadot-statement-table"
+version = "0.9.5"
+authors = ["Parity Technologies <admin@parity.io>"]
+edition = "2018"
+
+[dependencies]
+parity-scale-codec = { version = "2.0.0", default-features = false, features = ["derive"] }
+sp-core = { git = "https://github.com/paritytech/substrate", branch = "rh-v0.9.5-missing-companions" }
+primitives = { package = "polkadot-primitives", path = "../primitives" }
