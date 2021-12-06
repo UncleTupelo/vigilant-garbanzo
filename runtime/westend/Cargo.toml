@@ -1,0 +1,186 @@
+[package]
+name = "westend-runtime"
+version = "0.8.28"
+authors = ["Parity Technologies <admin@parity.io>"]
+edition = "2018"
+build = "build.rs"
+
+[dependencies]
+bitvec = { version = "0.20.1", default-features = false, features = ["alloc"] }
+parity-scale-codec = { version = "2.0.0", default-features = false, features = ["derive"] }
+log = { version = "0.4.13", optional = true }
+rustc-hex = { version = "2.1.0", default-features = false }
+serde = { version = "1.0.123", default-features = false }
+serde_derive = { version = "1.0.117", optional = true }
+smallvec = "1.6.1"
+static_assertions = "1.1.0"
+
+authority-discovery-primitives = { package = "sp-authority-discovery", git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+babe-primitives = { package = "sp-consensus-babe", git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+sp-api = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+inherents = { package = "sp-inherents", git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+offchain-primitives = { package = "sp-offchain", git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+sp-std = { package = "sp-std", git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+sp-io = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+sp-runtime = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+sp-staking = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+sp-core = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+sp-session = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+sp-version = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+tx-pool-api = { package = "sp-transaction-pool", git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+block-builder-api = { package = "sp-block-builder", git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+
+pallet-authority-discovery = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+pallet-authorship = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+pallet-babe = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+pallet-balances = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+pallet-transaction-payment = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+pallet-transaction-payment-rpc-runtime-api = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+pallet-collective = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+pallet-democracy = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+pallet-elections-phragmen = { package = "pallet-elections-phragmen", git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+frame-executive = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+pallet-grandpa = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+pallet-identity = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+pallet-im-online = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+pallet-indices = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+pallet-membership = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+pallet-multisig = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+pallet-nicks = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+pallet-offences = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+pallet-proxy = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+pallet-randomness-collective-flip = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+pallet-recovery = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+pallet-scheduler = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+pallet-session = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+pallet-society = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+frame-support = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+pallet-staking = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+pallet-staking-reward-curve = { package = "pallet-staking-reward-curve", git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+pallet-sudo = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+frame-system = {git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+frame-system-rpc-runtime-api = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+pallet-timestamp = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+pallet-treasury = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+pallet-utility = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+pallet-vesting = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+
+frame-benchmarking = { git = "https://github.com/paritytech/substrate", default-features = false, optional = true , branch = "state-tracing-rpc" }
+frame-system-benchmarking = { git = "https://github.com/paritytech/substrate", default-features = false, optional = true , branch = "state-tracing-rpc" }
+pallet-offences-benchmarking = { git = "https://github.com/paritytech/substrate", default-features = false, optional = true , branch = "state-tracing-rpc" }
+pallet-session-benchmarking = { git = "https://github.com/paritytech/substrate", default-features = false, optional = true , branch = "state-tracing-rpc" }
+hex-literal = { version = "0.3.1", optional = true }
+
+runtime-common = { package = "polkadot-runtime-common", path = "../common", default-features = false }
+primitives = { package = "polkadot-primitives", path = "../../primitives", default-features = false }
+polkadot-parachain = { path = "../../parachain", default-features = false }
+
+[dev-dependencies]
+hex-literal = "0.3.1"
+libsecp256k1 = "0.3.5"
+tiny-keccak = "2.0.2"
+keyring = { package = "sp-keyring", git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+sp-trie = { git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+serde_json = "1.0.61"
+
+[build-dependencies]
+substrate-wasm-builder = "3.0.0"
+
+[features]
+default = ["std"]
+no_std = []
+only-staking = []
+std = [
+	"authority-discovery-primitives/std",
+	"pallet-authority-discovery/std",
+	"bitvec/std",
+	"primitives/std",
+	"rustc-hex/std",
+	"parity-scale-codec/std",
+	"inherents/std",
+	"sp-core/std",
+	"polkadot-parachain/std",
+	"sp-api/std",
+	"tx-pool-api/std",
+	"block-builder-api/std",
+	"offchain-primitives/std",
+	"sp-std/std",
+	"sp-io/std",
+	"frame-support/std",
+	"pallet-authorship/std",
+	"pallet-balances/std",
+	"pallet-transaction-payment/std",
+	"pallet-transaction-payment-rpc-runtime-api/std",
+	"pallet-collective/std",
+	"pallet-elections-phragmen/std",
+	"pallet-democracy/std",
+	"frame-executive/std",
+	"pallet-grandpa/std",
+	"pallet-identity/std",
+	"pallet-im-online/std",
+	"pallet-indices/std",
+	"pallet-membership/std",
+	"pallet-multisig/std",
+	"pallet-nicks/std",
+	"pallet-offences/std",
+	"pallet-proxy/std",
+	"pallet-recovery/std",
+	"sp-runtime/std",
+	"sp-staking/std",
+	"pallet-scheduler/std",
+	"pallet-session/std",
+	"pallet-society/std",
+	"pallet-staking/std",
+	"pallet-sudo/std",
+	"frame-system/std",
+	"frame-system-rpc-runtime-api/std",
+	"pallet-timestamp/std",
+	"pallet-treasury/std",
+	"sp-version/std",
+	"pallet-utility/std",
+	"pallet-vesting/std",
+	"serde_derive",
+	"serde/std",
+	"log",
+	"pallet-babe/std",
+	"babe-primitives/std",
+	"sp-session/std",
+	"pallet-randomness-collective-flip/std",
+	"runtime-common/std",
+]
+runtime-benchmarks = [
+	"runtime-common/runtime-benchmarks",
+	"frame-benchmarking",
+	"frame-support/runtime-benchmarks",
+	"frame-system/runtime-benchmarks",
+	"sp-runtime/runtime-benchmarks",
+	"pallet-babe/runtime-benchmarks",
+	"pallet-balances/runtime-benchmarks",
+	"pallet-collective/runtime-benchmarks",
+	"pallet-democracy/runtime-benchmarks",
+	"pallet-elections-phragmen/runtime-benchmarks",
+	"pallet-grandpa/runtime-benchmarks",
+	"pallet-identity/runtime-benchmarks",
+	"pallet-im-online/runtime-benchmarks",
+	"pallet-indices/runtime-benchmarks",
+	"pallet-multisig/runtime-benchmarks",
+	"pallet-proxy/runtime-benchmarks",
+	"pallet-scheduler/runtime-benchmarks",
+	"pallet-society/runtime-benchmarks",
+	"pallet-staking/runtime-benchmarks",
+	"pallet-timestamp/runtime-benchmarks",
+	"pallet-treasury/runtime-benchmarks",
+	"pallet-utility/runtime-benchmarks",
+	"pallet-vesting/runtime-benchmarks",
+	"pallet-offences-benchmarking",
+	"pallet-session-benchmarking",
+	"frame-system-benchmarking",
+	"hex-literal",
+]
+
+# When enabled, the runtime api will not be build.
+#
+# This is required by Cumulus to access certain types of the
+# runtime without clashing with the runtime api exported functions
+# in WASM.
+disable-runtime-api = []

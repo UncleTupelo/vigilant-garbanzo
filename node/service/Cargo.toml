@@ -1,0 +1,135 @@
+[package]
+name = "polkadot-service"
+version = "0.8.3"
+authors = ["Parity Technologies <admin@parity.io>"]
+edition = "2018"
+
+[dependencies]
+# Substrate Client
+sc-authority-discovery = { git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+babe = { package = "sc-consensus-babe", git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+grandpa = { package = "sc-finality-grandpa", git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+sc-block-builder = { git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+sc-chain-spec = { git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+sc-client-api = { git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+sc-client-db = { git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+sc-consensus = { git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+sc-consensus-slots = { git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+sc-executor = { git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+sc-finality-grandpa-warp-sync = { git = "https://github.com/paritytech/substrate", optional = true , branch = "state-tracing-rpc" }
+sc-network = { git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+sc-transaction-pool = { git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+service = { package = "sc-service", git = "https://github.com/paritytech/substrate", default-features = false , branch = "state-tracing-rpc" }
+telemetry = { package = "sc-telemetry", git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+
+# Substrate Primitives
+sp-authority-discovery = { git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+babe-primitives = { package = "sp-consensus-babe", git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+consensus_common = { package = "sp-consensus", git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+grandpa_primitives = { package = "sp-finality-grandpa", git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+inherents = { package = "sp-inherents", git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+sp-api = { git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+sp-block-builder = { git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+sp-blockchain = { git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+sp-core = { git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+sp-io = { git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+sp-keystore = { git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+sp-offchain = { package = "sp-offchain", git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+sp-runtime = { git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+sp-session = { git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+sp-storage = { git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+sp-transaction-pool = { git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+sp-trie = { git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+sp-state-machine = { git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+
+# Substrate Pallets
+pallet-babe = { git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+pallet-im-online = { git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+pallet-staking = { git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+pallet-transaction-payment-rpc-runtime-api = { git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+
+# Substrate Other
+frame-benchmarking = { git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+frame-system-rpc-runtime-api = { git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+prometheus-endpoint = { package = "substrate-prometheus-endpoint", git = "https://github.com/paritytech/substrate", branch = "state-tracing-rpc" }
+
+# External Crates
+futures = "0.3.12"
+hex-literal = "0.3.1"
+tracing = "0.1.22"
+tracing-futures = "0.2.4"
+serde = { version = "1.0.123", features = ["derive"] }
+thiserror = "1.0.23"
+
+# Polkadot
+polkadot-node-core-proposer = { path = "../core/proposer" }
+polkadot-overseer = { path = "../overseer" }
+polkadot-parachain = { path = "../../parachain" }
+polkadot-primitives = { path = "../../primitives" }
+polkadot-rpc = { path = "../../rpc" }
+polkadot-subsystem = { package = "polkadot-node-subsystem", path = "../subsystem" }
+polkadot-node-subsystem-util = { path = "../subsystem-util" }
+polkadot-runtime-parachains = { path = "../../runtime/parachains" }
+
+# Polkadot Runtimes
+polkadot-runtime = { path = "../../runtime/polkadot" }
+kusama-runtime = { path = "../../runtime/kusama" }
+westend-runtime = { path = "../../runtime/westend" }
+rococo-runtime = { path = "../../runtime/rococo" }
+
+# Polkadot Subsystems
+polkadot-availability-bitfield-distribution = { path = "../network/bitfield-distribution", optional = true }
+polkadot-availability-distribution = { path = "../network/availability-distribution", optional = true }
+polkadot-availability-recovery = { path = "../network/availability-recovery", optional = true }
+polkadot-collator-protocol = { path = "../network/collator-protocol", optional = true }
+polkadot-network-bridge = { path = "../network/bridge", optional = true }
+polkadot-node-collation-generation = { path = "../collation-generation", optional = true }
+polkadot-node-core-av-store = { path = "../core/av-store", optional = true }
+polkadot-node-core-backing = { path = "../core/backing", optional = true }
+polkadot-node-core-bitfield-signing = { path = "../core/bitfield-signing", optional = true }
+polkadot-node-core-candidate-selection = { path = "../core/candidate-selection", optional = true }
+polkadot-node-core-candidate-validation = { path = "../core/candidate-validation", optional = true }
+polkadot-node-core-chain-api = { path = "../core/chain-api", optional = true }
+polkadot-node-core-provisioner = { path = "../core/provisioner", optional = true }
+polkadot-node-core-runtime-api = { path = "../core/runtime-api", optional = true }
+polkadot-pov-distribution = { path = "../network/pov-distribution", optional = true }
+polkadot-statement-distribution = { path = "../network/statement-distribution", optional = true }
+polkadot-approval-distribution = { path = "../network/approval-distribution", optional = true }
+
+[dev-dependencies]
+polkadot-test-client = { path = "../test/client" }
+env_logger = "0.8.2"
+
+[features]
+default = ["db", "full-node"]
+db = ["service/db"]
+full-node = [
+	"polkadot-node-core-av-store",
+	"sc-finality-grandpa-warp-sync"
+]
+
+runtime-benchmarks = [
+	"polkadot-runtime/runtime-benchmarks",
+	"kusama-runtime/runtime-benchmarks",
+	"westend-runtime/runtime-benchmarks",
+	"rococo-runtime/runtime-benchmarks"
+]
+
+real-overseer = [
+	"polkadot-availability-bitfield-distribution",
+	"polkadot-availability-distribution",
+	"polkadot-availability-recovery",
+	"polkadot-collator-protocol",
+	"polkadot-network-bridge",
+	"polkadot-node-collation-generation",
+	"polkadot-node-core-backing",
+	"polkadot-node-core-bitfield-signing",
+	"polkadot-node-core-candidate-selection",
+	"polkadot-node-core-candidate-validation",
+	"polkadot-node-core-chain-api",
+	"polkadot-node-core-provisioner",
+	"polkadot-node-core-runtime-api",
+	"polkadot-pov-distribution",
+	"polkadot-statement-distribution",
+	"polkadot-approval-distribution",
+]
