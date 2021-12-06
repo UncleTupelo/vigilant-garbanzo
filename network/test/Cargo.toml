@@ -1,0 +1,23 @@
+[package]
+name = "polkadot-network-test"
+version = "0.8.19"
+license = "GPL-3.0"
+authors = ["Parity Technologies <admin@parity.io>"]
+edition = "2018"
+
+[dependencies]
+log = "0.4.8"
+parking_lot = "0.10.0"
+futures = "0.3.1"
+rand = "0.7.2"
+sc-consensus = { git = "https://github.com/mxinden/substrate", branch = "conditional-kbucket-insertion" }
+sc-network = { git = "https://github.com/mxinden/substrate", branch = "conditional-kbucket-insertion" }
+sc-service = { git = "https://github.com/mxinden/substrate", features = ["test-helpers"], branch = "conditional-kbucket-insertion" }
+sc-network-test = { git = "https://github.com/mxinden/substrate", branch = "conditional-kbucket-insertion" }
+sp-consensus = { git = "https://github.com/mxinden/substrate", branch = "conditional-kbucket-insertion" }
+sc-client-api = { git = "https://github.com/mxinden/substrate", branch = "conditional-kbucket-insertion" }
+sp-blockchain = { git = "https://github.com/mxinden/substrate", branch = "conditional-kbucket-insertion" }
+sp-runtime = { git = "https://github.com/mxinden/substrate", branch = "conditional-kbucket-insertion" }
+sp-core = { git = "https://github.com/mxinden/substrate", branch = "conditional-kbucket-insertion" }
+sc-block-builder = { git = "https://github.com/mxinden/substrate", branch = "conditional-kbucket-insertion" }
+polkadot-test-runtime-client = { path = "../../runtime/test-runtime/client" }

@@ -1,0 +1,56 @@
+[package]
+name = "polkadot-test-service"
+version = "0.8.2"
+authors = ["Parity Technologies <admin@parity.io>"]
+edition = "2018"
+
+[dependencies]
+futures = "0.3.4"
+futures01 = { package = "futures", version = "0.1.29" }
+hex = "0.4"
+log = "0.4.8"
+rand = "0.7.3"
+tempfile = "3.1.0"
+
+# Polkadot dependencies
+av_store = { package = "polkadot-availability-store", path = "../../availability-store" }
+consensus = { package = "polkadot-validation", path = "../../validation" }
+polkadot-network = { path = "../../network" }
+polkadot-primitives = { path = "../../primitives" }
+polkadot-rpc = { path = "../../rpc" }
+polkadot-runtime-common = { path = "../../runtime/common" }
+polkadot-service = { path = "../../service" }
+polkadot-test-runtime = { path = "../../runtime/test-runtime" }
+
+# Substrate dependencies
+authority-discovery = { package = "sc-authority-discovery", git = "https://github.com/mxinden/substrate", branch = "conditional-kbucket-insertion" }
+babe = { package = "sc-consensus-babe", git = "https://github.com/mxinden/substrate", branch = "conditional-kbucket-insertion" }
+babe-primitives = { package = "sp-consensus-babe", git = "https://github.com/mxinden/substrate", branch = "conditional-kbucket-insertion" }
+consensus_common = { package = "sp-consensus", git = "https://github.com/mxinden/substrate", branch = "conditional-kbucket-insertion" }
+frame-benchmarking = { git = "https://github.com/mxinden/substrate", branch = "conditional-kbucket-insertion" }
+frame-system = { git = "https://github.com/mxinden/substrate", branch = "conditional-kbucket-insertion" }
+grandpa = { package = "sc-finality-grandpa", git = "https://github.com/mxinden/substrate", branch = "conditional-kbucket-insertion" }
+grandpa_primitives = { package = "sp-finality-grandpa", git = "https://github.com/mxinden/substrate", branch = "conditional-kbucket-insertion" }
+inherents = { package = "sp-inherents", git = "https://github.com/mxinden/substrate", branch = "conditional-kbucket-insertion" }
+pallet-staking = { git = "https://github.com/mxinden/substrate", branch = "conditional-kbucket-insertion" }
+pallet-transaction-payment = { git = "https://github.com/mxinden/substrate", branch = "conditional-kbucket-insertion" }
+sc-chain-spec = { git = "https://github.com/mxinden/substrate", branch = "conditional-kbucket-insertion" }
+sc-client-api = { git = "https://github.com/mxinden/substrate", branch = "conditional-kbucket-insertion" }
+sc-consensus = { git = "https://github.com/mxinden/substrate", branch = "conditional-kbucket-insertion" }
+sc-executor = { git = "https://github.com/mxinden/substrate", branch = "conditional-kbucket-insertion" }
+sc-informant = { git = "https://github.com/mxinden/substrate", branch = "conditional-kbucket-insertion" }
+sc-network = { git = "https://github.com/mxinden/substrate", branch = "conditional-kbucket-insertion" }
+sc-transaction-pool = { git = "https://github.com/mxinden/substrate", branch = "conditional-kbucket-insertion" }
+service = { package = "sc-service", git = "https://github.com/mxinden/substrate", branch = "conditional-kbucket-insertion", default-features = false }
+sp-arithmetic = { git = "https://github.com/mxinden/substrate", branch = "conditional-kbucket-insertion" }
+sp-blockchain = { git = "https://github.com/mxinden/substrate", branch = "conditional-kbucket-insertion" }
+sp-core = { git = "https://github.com/mxinden/substrate", branch = "conditional-kbucket-insertion" }
+sp-keyring = { git = "https://github.com/mxinden/substrate", branch = "conditional-kbucket-insertion" }
+sp-runtime = { git = "https://github.com/mxinden/substrate", branch = "conditional-kbucket-insertion" }
+sp-state-machine = { git = "https://github.com/mxinden/substrate", branch = "conditional-kbucket-insertion" }
+substrate-test-client = { git = "https://github.com/mxinden/substrate", branch = "conditional-kbucket-insertion" }
+
+[dev-dependencies]
+pallet-balances = { git = "https://github.com/mxinden/substrate", branch = "conditional-kbucket-insertion", default-features = false }
+serde_json = "1.0"
+tokio = { version = "0.2", features = ["macros"] }
